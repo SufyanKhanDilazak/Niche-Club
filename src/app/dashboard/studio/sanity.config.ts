@@ -1,0 +1,15 @@
+import { defineConfig } from "sanity"
+import { structureTool } from "sanity/structure"
+import { visionTool } from "@sanity/vision"
+import { apiVersion, dataset, projectId } from "../../../sanity/env"
+import { schema } from "../../../sanity/schemaTypes"
+import { structure } from "../../../sanity/structure"
+
+export default defineConfig({
+  projectId,
+  dataset,
+  apiVersion,
+  basePath: "/dashboard/studio",
+  plugins: [structureTool({ structure }), visionTool({ defaultApiVersion: apiVersion })],
+  schema,
+})
