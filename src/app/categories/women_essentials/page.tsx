@@ -37,7 +37,7 @@ interface IProduct {
 
 type SortType = 'price-low' | 'price-high' | 'name'
 
-// Single banner image for men collection
+// Single banner image for women essentials
 const BANNER_IMAGE = '/light1.png'
 
 const ProductCard = memo(({ product, index }: { product: IProduct; index: number }) => {
@@ -188,7 +188,7 @@ const Banner = memo(() => {
           <div className="absolute inset-0">
             <Image
               src={BANNER_IMAGE}
-              alt="Men Collection"
+              alt="Women Essentials"
               fill
               priority
               sizes="100vw"
@@ -208,7 +208,7 @@ const Banner = memo(() => {
 
 Banner.displayName = 'Banner'
 
-export default function NicheEssentialsPage() {
+export default function WomenEssentialsPage() {
   const [products, setProducts] = useState<IProduct[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -220,7 +220,7 @@ export default function NicheEssentialsPage() {
       setError(null)
       
       const query = `*[_type == "product" && 
-   references(*[_type == "category" && title == "men-collection"]._id)
+   references(*[_type == "category" && title == "women-essentials"]._id)
 ] {
   _id,
   name,
@@ -248,8 +248,8 @@ export default function NicheEssentialsPage() {
       const data = await client.fetch<IProduct[]>(query)
       setProducts(data)
     } catch (error) {
-      console.error('Error fetching men collection:', error)
-      setError('Failed to load men collection')
+      console.error('Error fetching women essentials:', error)
+      setError('Failed to load women essentials')
     } finally {
       setIsLoading(false)
     }
@@ -293,20 +293,20 @@ export default function NicheEssentialsPage() {
   const features = useMemo(() => [
     {
       icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z",
-      title: "Premium Men's Fashion",
-      description: "Meticulously crafted menswear with the finest materials and attention to detail",
+      title: "Premium Women's Fashion",
+      description: "Meticulously crafted womenswear with the finest materials and attention to detail",
       gradient: "from-blue-500 to-purple-500 dark:from-[#a90068] dark:to-purple-500"
     },
     {
       icon: "M13 10V3L4 14h7v7l9-11h-7z",
       title: "Perfect Fit",
-      description: "Tailored cuts designed specifically for the modern man's comfort and style",
+      description: "Tailored cuts designed specifically for comfort and style",
       gradient: "from-green-500 to-emerald-500"
     },
     {
       icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
       title: "Timeless Style",
-      description: "Classic menswear designs that never go out of fashion and elevate your wardrobe",
+      description: "Classic designs that never go out of fashion and elevate your wardrobe",
       gradient: "from-red-500 to-pink-500"
     }
   ], [])
@@ -320,7 +320,7 @@ export default function NicheEssentialsPage() {
             transform: translateY(30px);
           }
           to {
-            opacity: 1;
+            opacity: 1);
             transform: translateY(0);
           }
         }
@@ -392,7 +392,7 @@ export default function NicheEssentialsPage() {
                   </div>
                 ) : products.length === 0 ? (
                   <div className="col-span-full text-center py-8">
-                    <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-light">No men collection found</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-light">No women essentials found</p>
                   </div>
                 ) : (
                   memoizedProducts
@@ -420,7 +420,7 @@ export default function NicheEssentialsPage() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h4 className="text-2xl sm:text-3xl font-light text-gray-900 dark:text-white mb-6">
-                Why Choose Our Men Collection
+                Why Choose Our Women Essentials
               </h4>
               <div className="w-24 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 dark:from-[#a90068] dark:to-purple-500 mx-auto rounded-full" />
             </div>

@@ -41,10 +41,16 @@ export function Header() {
     { name: 'CONTACT', href: '/contact' },
   ], []);
 
-  const categoryLinks = useMemo(() => [
-    { name: 'MEN', href: '/categories/men_collection' },
-    { name: 'WOMEN', href: '/categories/women_collection' },
-    { name: 'ALL PRODUCTS', href: '/categories/all_product' },
+  // exact links as provided
+  const mensLinks = useMemo(() => [
+    { name: 'ESSENTIALS', href: '/categories/men_essentials' },
+    { name: 'TEES', href: '/categories/men_tees' },
+    { name: 'DENIM', href: '/categories/men_denim' },
+  ], []);
+
+  const womenLinks = useMemo(() => [
+    { name: 'ESSENTIALS', href: '/categories/women_essentials' },
+    { name: 'TEES', href: '/categories/women_tees' },
   ], []);
 
   const handleRemoveFromCart = useCallback((item: CartItem) => {
@@ -126,15 +132,21 @@ export function Header() {
                       HOME
                       {isActive('/') && <span className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--theme-primary)] to-transparent shadow-[0_0_10px_2px_var(--theme-primary)]" />}
                     </Link>
+
+                    {/* MENS (mobile) */}
                     <Accordion type="single" collapsible className="w-full">
-                      <AccordionItem value="categories" className="border-none">
+                      <AccordionItem value="mens" className="border-none">
                         <AccordionTrigger className="py-2 uppercase text-black dark:text-white hover:text-[var(--theme-primary)] transition-all duration-300 ease-in-out no-underline hover:no-underline hover:translate-x-1">
-                          CATEGORIES
+                          MENS
                         </AccordionTrigger>
                         <AccordionContent className="pt-2 pb-4 transition-all duration-500 ease-in-out">
                           <div className="flex flex-col space-y-2 bg-gray-50 dark:bg-gray-900/50 rounded-md p-3">
-                            {categoryLinks.map((link) => (
-                              <Link key={link.href} href={link.href} className="block py-2 px-3 text-sm text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] transition-all duration-200 ease-in-out rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:scale-105 hover:translate-x-1">
+                            {mensLinks.map((link) => (
+                              <Link
+                                key={link.href}
+                                href={link.href}
+                                className="block py-2 px-3 text-sm text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] transition-all duration-200 ease-in-out rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:scale-105 hover:translate-x-1"
+                              >
                                 {link.name}
                               </Link>
                             ))}
@@ -142,12 +154,36 @@ export function Header() {
                         </AccordionContent>
                       </AccordionItem>
                     </Accordion>
+
+                    {/* WOMEN (mobile) */}
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="women" className="border-none">
+                        <AccordionTrigger className="py-2 uppercase text-black dark:text-white hover:text-[var(--theme-primary)] transition-all duration-300 ease-in-out no-underline hover:no-underline hover:translate-x-1">
+                          WOMEN
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-2 pb-4 transition-all duration-500 ease-in-out">
+                          <div className="flex flex-col space-y-2 bg-gray-50 dark:bg-gray-900/50 rounded-md p-3">
+                            {womenLinks.map((link) => (
+                              <Link
+                                key={link.href}
+                                href={link.href}
+                                className="block py-2 px-3 text-sm text-gray-700 dark:text-gray-300 hover:text-[var(--theme-primary)] transition-all duration-200 ease-in-out rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:scale-105 hover:translate-x-1"
+                              >
+                                {link.name}
+                              </Link>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+
                     {navLinks.map((link) => (
                       <Link key={link.href} href={link.href} className={`relative py-2 uppercase transition-all duration-300 ease-in-out ${isActive(link.href) ? 'text-[var(--theme-primary)]' : 'text-black dark:text-white'} hover:text-[var(--theme-primary)] hover:translate-x-1`}>
                         {link.name}
                         {isActive(link.href) && <span className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--theme-primary)] to-transparent shadow-[0_0_10px_2px_var(--theme-primary)]" />}
                       </Link>
                     ))}
+
                     <div className="pt-4">
                       <SignedIn>
                         <div className="flex items-center gap-2 py-2 text-black dark:text-white">
@@ -176,17 +212,38 @@ export function Header() {
               HOME
               <span className={`absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--theme-primary)] to-transparent shadow-[0_0_10px_2px_var(--theme-primary)] transition-all duration-300 ease-in-out ${isActive('/') ? 'w-full' : 'w-0 group-hover:w-full'}`} />
             </Link>
+
+            {/* MENS (desktop) */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center group uppercase text-black dark:text-white hover:text-[var(--theme-primary)] transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-y-0.5 focus:bg-transparent">
-                  CATEGORIES
+                  MENS
                   <ChevronDown className="ml-1 h-4 w-4 transition-transform duration-300 ease-in-out group-hover:rotate-180" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-72 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 shadow-lg rounded-xl p-4 transition-all duration-200 ease-in-out" align="start" sideOffset={8} alignOffset={-4}>
-                {categoryLinks.map((link) => (
+                {mensLinks.map((link) => (
                   <DropdownMenuItem key={link.href} className="focus:bg-gray-100 dark:focus:bg-gray-900 cursor-pointer uppercase rounded-md transition-all duration-200 ease-in-out">
-                    <Link href={link.href} className="w-full text-sm font-semibold text-black dark:text-white hover:text-[var(--theme-primary)] py-3 px-4 block hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-md hover:scale-105 hover:translate-x-1 transition-all duration-200 ease-in-out">
+                    <Link href={link.href} className="w-full text-sm text-black dark:text-white hover:text-[var(--theme-primary)] py-3 px-4 block hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-md hover:scale-105 hover:translate-x-1 transition-all duration-200 ease-in-out">
+                      {link.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* WOMEN (desktop) */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center group uppercase text-black dark:text-white hover:text-[var(--theme-primary)] transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-y-0.5 focus:bg-transparent">
+                  WOMEN
+                  <ChevronDown className="ml-1 h-4 w-4 transition-transform duration-300 ease-in-out group-hover:rotate-180" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-72 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 shadow-lg rounded-xl p-4 transition-all duration-200 ease-in-out" align="start" sideOffset={8} alignOffset={-4}>
+                {womenLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} className="focus:bg-gray-100 dark:focus:bg-gray-900 cursor-pointer uppercase rounded-md transition-all duration-200 ease-in-out">
+                    <Link href={link.href} className="w-full text-sm text-black dark:text-white hover:text-[var(--theme-primary)] py-3 px-4 block hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-md hover:scale-105 hover:translate-x-1 transition-all duration-200 ease-in-out">
                       {link.name}
                     </Link>
                   </DropdownMenuItem>
@@ -290,7 +347,7 @@ export function Header() {
                                     <Minus className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                                   </Button>
                                   <span className="w-5 sm:w-6 text-center text-xs sm:text-sm">{item.quantity}</span>
-                                  <Button variant="ghost" size="sm" className="h-6 w-6 sm:h-7 sm:w-7 p-0 hover:scale-90 transition-transform duration-200 ease-in-out" onClick={() => addToCart({...item, quantity: 1})}>
+                                  <Button variant="ghost" size="sm" className="h-6 w-6 sm:h-7 sm:w-7 p-0 hover:scale-90 transition-transform duration-200 ease-in-out" onClick={() => addToCart({ ...item, quantity: 1 })}>
                                     <Plus className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                                   </Button>
                                 </div>

@@ -2,8 +2,11 @@ import { defineField, defineType } from 'sanity'
 
 const customSlugify = (input: string): string => {
   const slugMap: { [key: string]: string } = {
-    'men_collection': 'men-collection',
-    'women_collection': 'women-collection',
+    'men_essentials': 'men-essentials',
+    'men_denim': 'men-denim',
+    'men_tees': 'men-tees',
+    'women_essentials': 'women-essentials',
+    'women_tees': 'women-tees',
     'men_showcase': 'men-showcase',
     'women_showcase': 'women-showcase'
   };
@@ -41,8 +44,11 @@ export const categorySchema = defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Men_collection', value: 'men-collection' },
-          { title: 'Women_collection', value: 'women-collection' },
+          { title: 'Men_essentials', value: 'men-essentials' },
+          { title: 'Men_denim', value: 'men-denim' },
+          { title: 'Men_tees', value: 'men-tees' },
+          { title: 'Women_essentials', value: 'women-essentials' },
+          { title: 'Women_tees', value: 'women-tees' },
           { title: 'Men_Showcase', value: 'men-showcase' },
           { title: 'Women_Showcase', value: 'women-showcase' }
         ],

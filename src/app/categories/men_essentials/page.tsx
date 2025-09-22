@@ -37,8 +37,8 @@ interface IProduct {
 
 type SortType = 'price-low' | 'price-high' | 'name'
 
-// Single banner image for women collection
-const BANNER_IMAGE = '/denim.png'
+// Single banner image for men essentials
+const BANNER_IMAGE = '/light1.png'
 
 const ProductCard = memo(({ product, index }: { product: IProduct; index: number }) => {
   const [imageLoading, setImageLoading] = useState(true)
@@ -188,12 +188,12 @@ const Banner = memo(() => {
           <div className="absolute inset-0">
             <Image
               src={BANNER_IMAGE}
-              alt="Women Collection"
+              alt="Men Essentials"
               fill
               priority
               sizes="100vw"
               quality={90}
-              className="object-cover object-center scale-150 sm:scale-75"
+              className="object-cover object-center scale-[2] sm:scale-100"
             />
           </div>
           
@@ -208,7 +208,7 @@ const Banner = memo(() => {
 
 Banner.displayName = 'Banner'
 
-export default function WomenCollectionPage() {
+export default function NicheEssentialsPage() {
   const [products, setProducts] = useState<IProduct[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -218,9 +218,9 @@ export default function WomenCollectionPage() {
     try {
       setIsLoading(true)
       setError(null)
-          
+      
       const query = `*[_type == "product" && 
-   references(*[_type == "category" && title == "women-collection"]._id)
+   references(*[_type == "category" && title == "men-essentials"]._id)
 ] {
   _id,
   name,
@@ -248,8 +248,8 @@ export default function WomenCollectionPage() {
       const data = await client.fetch<IProduct[]>(query)
       setProducts(data)
     } catch (error) {
-      console.error('Error fetching women collection:', error)
-      setError('Failed to load women collection')
+      console.error('Error fetching men essentials:', error)
+      setError('Failed to load men essentials')
     } finally {
       setIsLoading(false)
     }
@@ -293,20 +293,20 @@ export default function WomenCollectionPage() {
   const features = useMemo(() => [
     {
       icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z",
-      title: "Premium Women's Fashion",
-      description: "Exquisite designs crafted with the finest materials for the modern woman",
+      title: "Premium Men's Fashion",
+      description: "Meticulously crafted menswear with the finest materials and attention to detail",
       gradient: "from-blue-500 to-purple-500 dark:from-[#a90068] dark:to-purple-500"
     },
     {
       icon: "M13 10V3L4 14h7v7l9-11h-7z",
       title: "Perfect Fit",
-      description: "Expertly tailored cuts designed to celebrate and flatter every woman's silhouette",
+      description: "Tailored cuts designed specifically for the modern man's comfort and style",
       gradient: "from-green-500 to-emerald-500"
     },
     {
       icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
-      title: "Elegant Style",
-      description: "Timeless elegance meets contemporary fashion for confident, stylish women",
+      title: "Timeless Style",
+      description: "Classic menswear designs that never go out of fashion and elevate your wardrobe",
       gradient: "from-red-500 to-pink-500"
     }
   ], [])
@@ -392,7 +392,7 @@ export default function WomenCollectionPage() {
                   </div>
                 ) : products.length === 0 ? (
                   <div className="col-span-full text-center py-8">
-                    <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-light">No women collection found</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-light">No men essentials found</p>
                   </div>
                 ) : (
                   memoizedProducts
@@ -420,7 +420,7 @@ export default function WomenCollectionPage() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h4 className="text-2xl sm:text-3xl font-light text-gray-900 dark:text-white mb-6">
-                Why Choose Our Women Collection
+                Why Choose Our Men Essentials
               </h4>
               <div className="w-24 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 dark:from-[#a90068] dark:to-purple-500 mx-auto rounded-full" />
             </div>

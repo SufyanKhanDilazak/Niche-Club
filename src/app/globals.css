@@ -1,11 +1,16 @@
 @tailwind base;
 
+/* Keep your custom dark variant for scoping */
 @custom-variant dark (&:is(.dark *));
 @tailwind components;
 @tailwind utilities;
 
+/* =========================
+   BASE TOKENS & THEME PALETTE
+   ========================= */
 @layer base {
   :root {
+    /* shadcn primitives (kept) */
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
@@ -27,11 +32,22 @@
     --ring: 0 0% 3.9%;
     --radius: 0.5rem;
 
-    /* Theme transition */
+    /* smooth theme transitions */
     --theme-transition: 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* NEW: app-wide palette (Light = Blue) */
+    --theme-primary: #3b82f6;
+    --theme-primary-hover: #2563eb;
+    --theme-bg: #ffffff;
+    --theme-surface: #f8fafc;
+    --theme-text: #000000;
+    --theme-text-muted: #64748b;
+    --theme-border-strong: #e5e7eb;
+    --theme-accent: #3b82f6;
   }
 
   .dark {
+    /* shadcn dark primitives (kept) */
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
@@ -51,17 +67,33 @@
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
     --ring: 0 0% 83.1%;
+
+    /* NEW: app palette (Dark = Pink) */
+    --theme-primary: #a90068;
+    --theme-primary-hover: #8a0055;
+    --theme-bg: #0f0f23;
+    --theme-surface: #1a1a2e;
+    --theme-text: #ffffff;
+    --theme-text-muted: #94a3b8;
+    --theme-border-strong: #374151;
+    --theme-accent: #a90068;
   }
 }
 
+/* =========================
+   GLOBAL RESET & ACCESSIBILITY
+   ========================= */
 @layer base {
   * {
     @apply border-border;
     box-sizing: border-box;
   }
 
-  body {
-    @apply bg-background text-foreground;
+  html, body {
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    height: 100%;
   }
 
   html {
@@ -72,60 +104,52 @@
     -ms-text-size-adjust: 100%;
   }
 
-  html, body {
-    overflow-x: hidden;
-    margin: 0;
-    padding: 0;
-    height: 100%;
+  body {
+    @apply bg-background text-foreground;
   }
 
-  /* Smooth theme transitions */
+  /* smooth theme transitions (opt-in via .theme-transition) */
   .theme-transition {
-    transition: 
+    transition:
       background-color var(--theme-transition),
       color var(--theme-transition),
       border-color var(--theme-transition);
   }
 
-  /* Video optimization */
+  /* media/content polish */
   video {
     object-fit: cover !important;
     object-position: center center !important;
     image-rendering: auto !important;
   }
 
-  /* Form inputs - prevent zoom on iOS */
+  /* prevent iOS zoom on inputs */
   input, select, textarea, button {
     font-size: max(16px, 1rem) !important;
     -webkit-appearance: none;
     appearance: none;
   }
 
-  /* Mobile optimizations */
+  /* mobile optimizations */
   @media (max-width: 768px) {
     * {
       -webkit-touch-callout: none;
       -webkit-tap-highlight-color: transparent;
     }
-
     body {
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
     }
   }
 
-  /* High DPI displays */
+  /* high DPI */
   @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    video {
-      image-rendering: -webkit-optimize-contrast !important;
-    }
+    video { image-rendering: -webkit-optimize-contrast !important; }
   }
 
-  /* Reduced motion accessibility */
+  /* reduced motion */
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
@@ -134,6 +158,9 @@
   }
 }
 
+/* =========================
+   SIDEBAR THEME (kept)
+   ========================= */
 :root {
   --sidebar: hsl(0 0% 98%);
   --sidebar-foreground: hsl(240 5.3% 26.1%);
@@ -144,7 +171,6 @@
   --sidebar-border: hsl(220 13% 91%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
-
 .dark {
   --sidebar: hsl(240 5.9% 10%);
   --sidebar-foreground: hsl(240 4.8% 95.9%);
@@ -156,6 +182,7 @@
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
+/* Tailwind inline theme map (kept) */
 @theme inline {
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -167,11 +194,24 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* unify final base (no duplicates) */
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  * { @apply border-border outline-ring/50; }
+  body { @apply bg-background text-foreground; }
+}
+
+/* =========================
+   OPTIONAL UTILITIES
+   ========================= */
+@layer utilities {
+  /* 1px glow line using theme primary (use in header borders etc.) */
+  .u-glow-line {
+    background-image: linear-gradient(to right, transparent, var(--theme-primary), transparent);
+    box-shadow: 0 0 10px 2px var(--theme-primary);
   }
-  body {
-    @apply bg-background text-foreground;
+
+  /* convenient gradient class if you prefer utility over arbitrary */
+  .u-gradient-primary {
+    background-image: linear-gradient(to right, var(--theme-primary), var(--theme-primary));
   }
 }

@@ -11,13 +11,6 @@ interface ICategory {
   slug: {
     current: string
   }
-  bannerImage?: {
-    asset: {
-      _id: string
-      url: string
-    }
-    alt?: string
-  }
 }
 
 interface IProduct {
@@ -42,7 +35,10 @@ interface IProduct {
   categories: ICategory[]
 }
 
-type SortType = 'price-low' | 'price-high' | 'name' | 'newest' | 'sale'
+type SortType = 'price-low' | 'price-high' | 'name'
+
+// Single banner image for women tees
+const BANNER_IMAGE = '/light1.png'
 
 const ProductCard = memo(({ product, index }: { product: IProduct; index: number }) => {
   const [imageLoading, setImageLoading] = useState(true)
@@ -53,27 +49,18 @@ const ProductCard = memo(({ product, index }: { product: IProduct; index: number
     setImageLoading(false)
   }, [])
 
-  const handleMouseEnter = useCallback(() => {
-    setIsHovered(true)
-  }, [])
-
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false)
-  }, [])
-
   return (
     <Link
       href={`/product/${product.slug?.current || product._id}`}
-      className="group block transform transition-all duration-500 ease-out hover:scale-[1.02] will-change-transform"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className="group block transform transition-all duration-500 ease-out hover:scale-[1.02]"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
         animationDelay: `${index * 100}ms`,
         animation: 'fadeInUp 0.6s ease-out forwards'
       }}
     >
       <article className="relative">
-        {/* Image Container */}
         <div className="relative w-full aspect-[4/5] overflow-hidden bg-transparent rounded-sm">
           {imageLoading && (
             <div className="absolute inset-0 bg-gradient-to-br from-gray-100/30 via-gray-200/20 to-gray-100/30 dark:from-gray-800/30 dark:via-gray-700/20 dark:to-gray-800/30">
@@ -107,7 +94,6 @@ const ProductCard = memo(({ product, index }: { product: IProduct; index: number
             </div>
           )}
 
-          {/* Enhanced Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
             {product.newArrival && (
               <span className="relative bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-white px-3 py-1.5 text-xs font-bold shadow-xl rounded-full backdrop-blur-sm transform transition-all duration-300 hover:scale-105">
@@ -123,7 +109,6 @@ const ProductCard = memo(({ product, index }: { product: IProduct; index: number
             )}
           </div>
 
-          {/* Hover Effect Overlay */}
           <div className={`absolute inset-0 transition-opacity duration-500 ${
             isHovered ? 'opacity-100' : 'opacity-0'
           }`}>
@@ -131,10 +116,8 @@ const ProductCard = memo(({ product, index }: { product: IProduct; index: number
           </div>
         </div>
 
-        {/* Enhanced Product Info */}
         <div className="mt-4 relative">
           <div className="border border-blue-500 dark:border-[#a90068] bg-transparent p-3 text-center transition-all duration-500 ease-out group-hover:border-opacity-80 group-hover:shadow-lg group-hover:shadow-blue-500/10 dark:group-hover:shadow-[#a90068]/10 relative overflow-hidden">
-            {/* Animated background on hover */}
             <div className={`absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-purple-500/5 dark:from-[#a90068]/5 dark:to-purple-500/5 transition-opacity duration-500 ${
               isHovered ? 'opacity-100' : 'opacity-0'
             }`} />
@@ -143,7 +126,7 @@ const ProductCard = memo(({ product, index }: { product: IProduct; index: number
               <h4 className="text-sm sm:text-base font-light text-black dark:text-white truncate mb-2 transition-colors duration-300">
                 {product.name}
               </h4>
-              <div className="flex items-center justify-center gap-2 mb-2">
+              <div className="flex items-center justify-center gap-2">
                 <p className="text-sm sm:text-base font-medium text-black dark:text-white transition-all duration-300 group-hover:scale-105">
                   ${product.price.toFixed(2)}
                 </p>
@@ -151,7 +134,6 @@ const ProductCard = memo(({ product, index }: { product: IProduct; index: number
                   <div className="w-1 h-1 bg-blue-500 dark:bg-[#a90068] rounded-full opacity-60" />
                 )}
               </div>
-
             </div>
           </div>
         </div>
@@ -175,15 +157,58 @@ const ProductSkeleton = memo(({ index }: { index: number }) => (
     </div>
     <div className="mt-4 border border-gray-300/30 dark:border-gray-600/30 p-3">
       <div className="h-4 bg-gradient-to-r from-gray-300/40 to-gray-200/40 dark:from-gray-600/40 dark:to-gray-700/40 rounded mb-2" />
-      <div className="h-4 bg-gradient-to-r from-gray-300/40 to-gray-200/40 dark:from-gray-600/40 dark:to-gray-700/40 rounded w-20 mx-auto mb-2" />
-      <div className="h-3 bg-gradient-to-r from-gray-200/40 to-gray-100/40 dark:from-gray-700/40 dark:to-gray-600/40 rounded w-16 mx-auto" />
+      <div className="h-4 bg-gradient-to-r from-gray-300/40 to-gray-200/40 dark:from-gray-600/40 dark:to-gray-700/40 rounded w-20 mx-auto" />
     </div>
   </div>
 ))
 
 ProductSkeleton.displayName = 'ProductSkeleton'
 
-export default function AllProductsPage() {
+const Banner = memo(() => {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <div className="px-2 sm:px-6 mb-8">
+        <div className="border border-blue-500 dark:border-[#a90068] bg-transparent backdrop-blur-md rounded-none sm:rounded-lg">
+          <div className="relative w-full h-[25vh] lg:h-[25vh] bg-gray-100 dark:bg-gray-900 animate-pulse" />
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="px-2 sm:px-6 mb-8">
+      <div className="border border-blue-500 dark:border-[#a90068] bg-transparent backdrop-blur-md rounded-none sm:rounded-lg overflow-hidden mt-32">
+        <div className="relative w-full h-[25vh] lg:h-[25vh] overflow-hidden">
+          <div className="absolute inset-0">
+            <Image
+              src={BANNER_IMAGE}
+              alt="Women Tees"
+              fill
+              priority
+              sizes="100vw"
+              quality={90}
+              className="object-cover object-center scale-[2] sm:scale-100"
+            />
+          </div>
+          
+          <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/10" />
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        </div>
+      </div>
+    </div>
+  )
+})
+
+Banner.displayName = 'Banner'
+
+export default function WomenTeesPage() {
   const [products, setProducts] = useState<IProduct[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -194,56 +219,41 @@ export default function AllProductsPage() {
       setIsLoading(true)
       setError(null)
       
-      const orderByMap: Record<SortType, string> = {
-        'price-low': 'order(price asc)',
-        'price-high': 'order(price desc)',
-        'name': 'order(name asc)',
-        'newest': 'order(_createdAt desc)',
-        'sale': 'order(onSale desc, price asc)'
-      }
-      
-      const orderBy = orderByMap[sortBy]
-      
-      const query = `*[_type == "product"] | ${orderBy} {
-        _id,
-        name,
-        slug,
-        price,
-        images[]{
-          asset->{
-            _id,
-            url
-          },
-          alt
-        },
-        description,
-        onSale,
-        newArrival,
-        sizes,
-        colors,
-        categories[]->{
-          _id,
-          title,
-          slug,
-          bannerImage{
-            asset->{
-              _id,
-              url
-            },
-            alt
-          }
-        }
-      }`
+      const query = `*[_type == "product" && 
+   references(*[_type == "category" && title == "women-tees"]._id)
+] {
+  _id,
+  name,
+  slug,
+  price,
+  images[]{
+    asset->{
+      _id,
+      url
+    },
+    alt
+  },
+  description,
+  onSale,
+  newArrival,
+  sizes,
+  colors,
+  categories[]->{
+    _id,
+    title,
+    slug
+  }
+}`
 
       const data = await client.fetch<IProduct[]>(query)
       setProducts(data)
     } catch (error) {
-      console.error('Error fetching all products:', error)
-      setError('Failed to load products')
+      console.error('Error fetching women tees:', error)
+      setError('Failed to load women tees')
     } finally {
       setIsLoading(false)
     }
-  }, [sortBy])
+  }, [])
 
   useEffect(() => {
     fetchProducts()
@@ -253,50 +263,53 @@ export default function AllProductsPage() {
     setSortBy(e.target.value as SortType)
   }, [])
 
+  // Sort products based on selected sort type
+  const sortedProducts = useMemo(() => {
+    const sorted = [...products]
+    switch (sortBy) {
+      case 'price-low':
+        return sorted.sort((a, b) => a.price - b.price)
+      case 'price-high':
+        return sorted.sort((a, b) => b.price - a.price)
+      case 'name':
+        return sorted.sort((a, b) => a.name.localeCompare(b.name))
+      default:
+        return sorted
+    }
+  }, [products, sortBy])
+
   const memoizedProducts = useMemo(() => 
-    products.map((product, index) => (
+    sortedProducts.map((product, index) => (
       <ProductCard key={product._id} product={product} index={index} />
-    )), [products]
+    )), [sortedProducts]
   )
 
   const memoizedSkeletons = useMemo(() => 
-    Array.from({ length: 12 }, (_, i) => (
+    Array.from({ length: 8 }, (_, i) => (
       <ProductSkeleton key={`skeleton-${i}`} index={i} />
     )), []
   )
 
-  const productStats = useMemo(() => {
-    const totalProducts = products.length
-    const onSaleCount = products.filter(p => p.onSale).length
-    const newArrivalsCount = products.filter(p => p.newArrival).length
-    const uniqueCategories = new Set(products.flatMap(p => p.categories?.map(c => c.title) || [])).size
-    
-    return { totalProducts, onSaleCount, newArrivalsCount, uniqueCategories }
-  }, [products])
-
   const features = useMemo(() => [
     {
       icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z",
-      title: "Complete Collection",
-      description: "Discover our entire range of premium products across all categories",
-      gradient: "from-blue-500 to-purple-500 dark:from-[#a90068] dark:to-purple-500",
-      count: productStats.totalProducts
+      title: "Premium Women's Fashion",
+      description: "Meticulously crafted womenswear with the finest materials and attention to detail",
+      gradient: "from-blue-500 to-purple-500 dark:from-[#a90068] dark:to-purple-500"
     },
     {
       icon: "M13 10V3L4 14h7v7l9-11h-7z",
-      title: "New Arrivals",
-      description: "Fresh additions to keep your style current and on-trend",
-      gradient: "from-green-500 to-emerald-500",
-      count: productStats.newArrivalsCount
+      title: "Perfect Fit",
+      description: "Tailored cuts designed specifically for the modern woman's comfort and style",
+      gradient: "from-green-500 to-emerald-500"
     },
     {
-      icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-      title: "Sale Items",
-      description: "Unbeatable deals on premium products with exceptional value",
-      gradient: "from-red-500 to-pink-500",
-      count: productStats.onSaleCount
+      icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
+      title: "Timeless Style",
+      description: "Classic womenswear designs that never go out of fashion and elevate your wardrobe",
+      gradient: "from-red-500 to-pink-500"
     }
-  ], [productStats])
+  ], [])
 
   return (
     <>
@@ -329,79 +342,23 @@ export default function AllProductsPage() {
         .animate-shimmer {
           animation: shimmer 2s infinite;
         }
-        
-        .will-change-transform {
-          will-change: transform;
-        }
       `}</style>
       
-      <main className="min-h-screen font-montserrat bg-transparent">
-        {/* Enhanced Hero Banner */}
-        <section className="mt-20 sm:mt-24 mb-16 relative">
-          <div className="relative h-[40vh] sm:h-[60vh] w-full overflow-hidden">
-            <Image
-              src="/denim1.jpg"
-              alt="All Products Collection"
-              fill
-              priority
-              quality={95}
-              sizes="100vw"
-              className="object-cover"
-            />
-            
-            <div className="absolute inset-0 flex items-center justify-center text-center px-6">
-              <div className="space-y-4 sm:space-y-6 animate-[fadeInUp_1s_ease-out]">
-                <div className="space-y-1 sm:space-y-2">
-                  <h1 className="text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white tracking-tight drop-shadow-2xl">
-                    ALL
-                  </h1>
-                  <h2 className="text-xl sm:text-4xl md:text-5xl lg:text-6xl font-thin text-white/90 tracking-[0.2em] drop-shadow-xl">
-                    PRODUCTS
-                  </h2>
-                </div>
-                <p className="text-white/80 text-xs sm:text-base lg:text-lg max-w-2xl mx-auto font-light leading-relaxed drop-shadow-lg">
-                  Explore our complete collection of premium lifestyle products
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+      <main className="min-h-screen font-montserrat bg-transparent sm:mt-28">
+        <Banner />
 
-        {/* Products Section with Background Style */}
         <section className="text-center mb-16 space-y-0 font-montserrat bg-transparent">
-          <div className="px-2 sm:px-6 mb-3">
-            <div className="relative h-24 sm:h-28 md:h-32 overflow-hidden rounded-lg border border-blue-500 dark:border-[#a90068] bg-transparent">
-              <Image
-                src="/denim1.jpg"
-                alt="All Products Banner"
-                fill
-                priority
-                quality={100}
-                sizes="100vw"
-                className="object-cover object-center"
-              />
-              
-              <div className="absolute inset-0 flex flex-col items-center justify-center px-6 sm:px-8 z-10">
-                <div className="w-16 sm:w-20 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 dark:from-[#a90068] dark:to-purple-500 mb-3 rounded-full" />
-                
-                <div className="flex items-center gap-4">
-                  <h3 className="text-white font-medium text-sm sm:text-base">
-                    ALL PRODUCTS
-                  </h3>
+          <div className="px-2 sm:px-6">
+            <div className="border border-blue-500 dark:border-[#a90068] bg-transparent backdrop-blur-md rounded-none sm:rounded-lg p-4 sm:p-6">
+              <div className="flex justify-between items-center mb-8">
+                <div className="flex-1 text-left">
                   {!isLoading && products.length > 0 && (
-                    <span className="text-white/80 text-xs sm:text-sm">
+                    <span className="text-blue-600 dark:text-[#a90068] text-sm font-medium">
                       {products.length} Products
                     </span>
                   )}
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="px-2 sm:px-6">
-            <div className="border border-blue-500 dark:border-[#a90068] bg-transparent backdrop-blur-md rounded-none sm:rounded-lg p-4 sm:p-6">
-              {/* Sort Dropdown */}
-              <div className="flex justify-center mb-8">
+                
                 <div className="relative">
                   <select
                     value={sortBy}
@@ -411,8 +368,6 @@ export default function AllProductsPage() {
                     <option value="price-low">Price: Low to High</option>
                     <option value="price-high">Price: High to Low</option>
                     <option value="name">Name: A to Z</option>
-                    <option value="newest">Newest First</option>
-                    <option value="sale">Sale Items First</option>
                   </select>
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                     <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -422,8 +377,7 @@ export default function AllProductsPage() {
                 </div>
               </div>
 
-              {/* Products Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 sm:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
                 {isLoading ? (
                   memoizedSkeletons
                 ) : error ? (
@@ -438,7 +392,7 @@ export default function AllProductsPage() {
                   </div>
                 ) : products.length === 0 ? (
                   <div className="col-span-full text-center py-8">
-                    <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-light">No products found</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-light">No women tees found</p>
                   </div>
                 ) : (
                   memoizedProducts
@@ -448,7 +402,6 @@ export default function AllProductsPage() {
           </div>
         </section>
 
-        {/* Back to Home Button */}
         {products.length > 0 && (
           <div className="text-center mb-12">
             <Link
@@ -463,12 +416,11 @@ export default function AllProductsPage() {
           </div>
         )}
 
-        {/* Enhanced Feature Section with Dynamic Stats */}
         <section className="px-4 sm:px-6 py-20 bg-gradient-to-r from-transparent via-transparent to-transparent">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <h4 className="text-2xl sm:text-3xl font-light text-gray-900 dark:text-white mb-6">
-                Complete Product Collection
+                Why Choose Our Women Tees
               </h4>
               <div className="w-24 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 dark:from-[#a90068] dark:to-purple-500 mx-auto rounded-full" />
             </div>
@@ -483,16 +435,10 @@ export default function AllProductsPage() {
                     animation: 'fadeInUp 0.8s ease-out forwards'
                   }}
                 >
-                  <div className={`w-18 h-18 mx-auto mb-6 bg-gradient-to-br ${feature.gradient} rounded-3xl flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl group-hover:shadow-2xl relative`}>
+                  <div className={`w-18 h-18 mx-auto mb-6 bg-gradient-to-br ${feature.gradient} rounded-3xl flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl group-hover:shadow-2xl`}>
                     <svg className="w-8 h-8 text-white transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={feature.icon} />
                     </svg>
-                    {/* Count Badge */}
-                    {!isLoading && feature.count > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-white text-gray-900 text-xs font-bold px-2 py-1 rounded-full shadow-lg min-w-[1.5rem] h-6 flex items-center justify-center">
-                        {feature.count}
-                      </span>
-                    )}
                   </div>
                   <h5 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-[#a90068] transition-colors duration-300">
                     {feature.title}
