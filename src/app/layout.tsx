@@ -14,6 +14,7 @@ import { CartProvider } from './components/CartContext';
 import { ThemeProvider } from './components/theme-context';
 import { HeadlineStrip } from './components/Headline';
 import AuroraStarsBackground from './components/AuroraStarsBackground';
+import HyperspeedLoaderOnce from './components/HyperspeedLoaderOnce';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -42,19 +43,33 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
-        {/* Early networking for Cloudinary (videos/posters) + Sanity (product images) */}
+        {/* If already seen, hide the loader BEFORE first paint (no reload flicker) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(){
+                try{
+                  if (localStorage.getItem('seenHyperspeedLoader') === 'true') {
+                    document.documentElement.setAttribute('data-hyperspeed-hide','1');
+                  }
+                }catch(e){}
+              })();
+            `,
+          }}
+        />
+
+        {/* Early networking for Cloudinary + Sanity */}
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.sanity.io" />
 
-        {/* Preload posters to avoid a blank frame before video paints */}
+        {/* Posters for dual-video to avoid initial blank frame */}
         <link rel="preload" as="image" href="/sky-poster.jpg" media="(prefers-color-scheme: light)" />
         <link rel="preload" as="image" href="/3d-poster.jpg" media="(prefers-color-scheme: dark)" />
 
-        {/* No-FOUC theme bootstrap: apply theme before first paint */}
+        {/* No-FOUC theme bootstrap */}
         <script
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
             __html: `
               try {
@@ -72,12 +87,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
 
-      {/* Inline bg ensures the very first paint matches the chosen theme */}
+      {/* Ensure first paint background matches selected theme */}
       <body className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--theme-bg)' }}>
+        {/* 🔥 Cinematic first-visit loader */}
+        <HyperspeedLoaderOnce />
+
         <ClerkProvider>
           <NextThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <ThemeProvider>
-              {/* Render content INSIDE the Aurora background (fewer layers & repaints) */}
               <AuroraStarsBackground>
                 <CartProvider>
                   <div className="relative z-10 flex flex-col min-h-screen">

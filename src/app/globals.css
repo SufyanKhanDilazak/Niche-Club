@@ -215,3 +215,44 @@
     background-image: linear-gradient(to right, var(--theme-primary), var(--theme-primary));
   }
 }
+/* ===========================
+   Hyperspeed First-Visit Loader
+   =========================== */
+
+   html[data-hyperspeed-hide="1"] .hs-loader { display: none !important; }
+
+   .hs-loader {
+     position: fixed;
+     inset: 0;
+     z-index: 999999;
+     background: #000; /* guarded background under the effect */
+     opacity: 1;
+     transition: opacity .8s ease-in-out;
+   }
+   
+   .hs-loader--hide { opacity: 0; pointer-events: none; }
+   
+   .hs-stage {
+     position: absolute;
+     inset: 0;
+   }
+   
+   .hs-overlay {
+     position: absolute;
+     inset: 0;
+     display: grid;
+     place-items: end center;
+     padding-bottom: clamp(24px, 5vh, 64px);
+     pointer-events: none;
+     background: linear-gradient(to top, rgba(0,0,0,.35), rgba(0,0,0,0) 30%);
+   }
+   
+   .hs-title {
+     color: #fff;
+     font-weight: 700;
+     letter-spacing: .3px;
+     font-size: clamp(1rem, 2.4vw, 1.4rem);
+     text-shadow: 0 2px 18px rgba(169, 0, 104, .45);
+     opacity: .9;
+   }
+   
