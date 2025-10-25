@@ -8,7 +8,9 @@ const customSlugify = (input: string): string => {
     'women_essentials': 'women-essentials',
     'women_tees': 'women-tees',
     'men_showcase': 'men-showcase',
-    'women_showcase': 'women-showcase'
+    'women_showcase': 'women-showcase',
+    'trending_products': 'trending-products',
+    'new_arrivals': 'new-arrivals',
   };
   
   // If input exists in slugMap, return mapped value
@@ -50,11 +52,13 @@ export const categorySchema = defineType({
           { title: 'Women_essentials', value: 'women-essentials' },
           { title: 'Women_tees', value: 'women-tees' },
           { title: 'Men_Showcase', value: 'men-showcase' },
-          { title: 'Women_Showcase', value: 'women-showcase' }
+          { title: 'Women_Showcase', value: 'women-showcase' },
+          { title: 'Trending_Products', value: 'trending-products' },
+          { title: 'New_Arrivals', value: 'new-arrivals' }
         ],
         layout: 'dropdown'
       },
-      initialValue: 'niche_essentials',
+      initialValue: 'men_essentials',
       validation: (Rule) => Rule.required()
     }),
     defineField({

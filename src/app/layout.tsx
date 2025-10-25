@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import { ThemeProvider as NextThemeProvider } from 'next-themes';
+import React from 'react';
 
 import './globals.css';
 
@@ -13,7 +14,6 @@ import { CartProvider } from './components/CartContext';
 import { ThemeProvider } from './components/theme-context';
 import { HeadlineStrip } from './components/Headline';
 import AuroraStarsBackground from './components/AuroraStarsBackground';
-import LoadingScreen from './components/LoadingScreen';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -42,47 +42,53 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://res.cloudinary.com" />
+        {/* Early networking for Cloudinary (videos/posters) + Sanity (product images) */}
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-        {/* Prevent flash by blocking render until theme is determined */}
+        <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.sanity.io" />
+
+        {/* Preload posters to avoid a blank frame before video paints */}
+        <link rel="preload" as="image" href="/sky-poster.jpg" media="(prefers-color-scheme: light)" />
+        <link rel="preload" as="image" href="/3d-poster.jpg" media="(prefers-color-scheme: dark)" />
+
+        {/* No-FOUC theme bootstrap: apply theme before first paint */}
         <script
+          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const theme = localStorage.getItem('theme');
-                const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                const isDark = theme === 'dark' || (theme !== 'light' && systemDark);
-                
-                document.documentElement.classList.toggle('dark', isDark);
-                document.documentElement.style.setProperty('--theme-primary', isDark ? '#a90068' : '#3b82f6');
-                document.documentElement.style.setProperty('--theme-bg', isDark ? '#0f0f23' : '#ffffff');
-                document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
-              } catch (e) {}
+                const t = localStorage.getItem('theme');
+                const sys = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const dark = t === 'dark' || (t !== 'light' && sys);
+                const dd = document.documentElement;
+                dd.classList.toggle('dark', dark);
+                dd.style.setProperty('--theme-primary', dark ? '#a90068' : '#3b82f6');
+                dd.style.setProperty('--theme-bg', dark ? '#0f0f23' : '#ffffff');
+                dd.style.colorScheme = dark ? 'dark' : 'light';
+              } catch {}
             `,
           }}
         />
       </head>
 
-      <body className="min-h-screen flex flex-col">
-        <LoadingScreen />
+      {/* Inline bg ensures the very first paint matches the chosen theme */}
+      <body className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--theme-bg)' }}>
         <ClerkProvider>
-          <NextThemeProvider 
-            attribute="class" 
-            defaultTheme="system" 
-            enableSystem={true}
-            disableTransitionOnChange={false}
-          >
+          <NextThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <ThemeProvider>
-              <CartProvider>
-                <AuroraStarsBackground />
-                <div className="relative z-10 flex flex-col min-h-screen">
-                  <Header />
-                  <HeadlineStrip/>
-                  <main className="flex-1">{children}</main>
-                  <Footer />
-                  <FooterTheme />
-                </div>
-              </CartProvider>
+              {/* Render content INSIDE the Aurora background (fewer layers & repaints) */}
+              <AuroraStarsBackground>
+                <CartProvider>
+                  <div className="relative z-10 flex flex-col min-h-screen">
+                    <Header />
+                    <HeadlineStrip />
+                    <main className="flex-1">{children}</main>
+                    <Footer />
+                    <FooterTheme />
+                  </div>
+                </CartProvider>
+              </AuroraStarsBackground>
             </ThemeProvider>
           </NextThemeProvider>
         </ClerkProvider>

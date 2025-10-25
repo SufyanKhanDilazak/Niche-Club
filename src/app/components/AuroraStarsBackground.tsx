@@ -1,296 +1,419 @@
 "use client";
 
-import { useTheme } from './theme-context';
-import { useEffect, useState, useRef, useCallback } from 'react';
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTheme } from "./theme-context";
+
+type ThemeKey = "light" | "dark";
 
 interface AuroraStarsBackgroundProps {
   children?: React.ReactNode;
 }
 
-// Pre-define video assets for better performance
+// === Your original assets (kept as-is; iOS behavior unchanged) ===
 const VIDEO_ASSETS = {
   dark: {
-    video: 'https://res.cloudinary.com/dxtq1hdrz/video/upload/q_auto,f_auto/v1752020163/3d_ufmaf5',
-    poster: '/3d-poster.jpg'
+    video: "https://res.cloudinary.com/dxtq1hdrz/video/upload/q_auto,f_auto/v1752020163/3d_ufmaf5",
+    poster: "/3d-poster.jpg",
   },
   light: {
-    video: 'https://res.cloudinary.com/dxtq1hdrz/video/upload/q_auto,f_auto/v1752020150/sky_zbzkub',
-    poster: '/sky-poster.jpg'
-  }
+    video: "https://res.cloudinary.com/dxtq1hdrz/video/upload/q_auto,f_auto/v1752020150/sky_zbzkub",
+    poster: "/sky-poster.jpg",
+  },
 } as const;
 
 export default function AuroraStarsBackground({ children }: AuroraStarsBackgroundProps) {
   const { isDarkMode, isThemeLoaded } = useTheme();
+
+  // --- state mirrors your original so semantics stay identical ---
   const [isClient, setIsClient] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
-  const [videoReady, setVideoReady] = useState({ light: false, dark: false });
-  const [activeVideo, setActiveVideo] = useState<'light' | 'dark'>('light');
+  const [videoReady, setVideoReady] = useState<{ light: boolean; dark: boolean }>({
+    light: false,
+    dark: false,
+  });
+  const [activeVideo, setActiveVideo] = useState<ThemeKey>("light");
   const [initialThemeDetected, setInitialThemeDetected] = useState(false);
-  const [clientTheme, setClientTheme] = useState<'light' | 'dark'>('light');
-  
+  const [clientTheme, setClientTheme] = useState<ThemeKey>("light");
+
+  // extra perf/ux flags
+  const [needsTap, setNeedsTap] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [saveData, setSaveData] = useState(false);
+
   const lightVideoRef = useRef<HTMLVideoElement>(null);
   const darkVideoRef = useRef<HTMLVideoElement>(null);
-  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const transitionTimeoutRef = useRef<number | null>(null);
 
-  // Detect initial theme on client before hydration
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Check stored theme or system preference
-      const storedTheme = localStorage.getItem('theme');
-      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      
-      let initialTheme: 'light' | 'dark';
-      if (storedTheme === 'dark' || storedTheme === 'light') {
-        initialTheme = storedTheme;
-      } else {
-        // If no stored theme, use system preference
-        initialTheme = systemDark ? 'dark' : 'light';
+  // ================= helpers =================
+  const safePlay = useCallback(async (el?: HTMLVideoElement | null) => {
+    if (!el) return false;
+    try {
+      const p = el.play();
+      if (p) await p;
+      return true;
+    } catch {
+      // single retry (Android WebView/older Chromium)
+      await new Promise((r) => setTimeout(r, 120));
+      try {
+        const p2 = el.play();
+        if (p2) await p2;
+        return true;
+      } catch {
+        return false;
       }
-      
-      setClientTheme(initialTheme);
-      setActiveVideo(initialTheme);
-      setInitialThemeDetected(true);
-      setIsClient(true);
     }
   }, []);
 
-  // Detect browser capabilities
+  const pauseEl = (el?: HTMLVideoElement | null) => {
+    try {
+      el?.pause();
+    } catch {}
+  };
+
   const isSafariOrIOS = useCallback(() => {
-    if (typeof navigator === 'undefined') return false;
+    if (typeof navigator === "undefined") return false;
     const ua = navigator.userAgent;
     return /iPad|iPhone|iPod|Safari/i.test(ua) && !/Chrome/i.test(ua);
   }, []);
 
-  // Client-side initialization with interaction detection
+  // Initial theme + environment (identical semantics to your original)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const storedTheme = localStorage.getItem("theme");
+    const systemDark = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches;
+    const initial: ThemeKey =
+      storedTheme === "dark" || storedTheme === "light"
+        ? (storedTheme as ThemeKey)
+        : systemDark
+        ? "dark"
+        : "light";
+
+    setClientTheme(initial);
+    setActiveVideo(initial);
+    setInitialThemeDetected(true);
+    setIsClient(true);
+
+    // perf policies
+    setReducedMotion(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true);
+    // @ts-expect-error non-standard network info
+    setSaveData(Boolean(navigator?.connection?.saveData));
+  }, []);
+
+  // Keep your iOS gating exact
   useEffect(() => {
     if (!isClient) return;
-    
-    // Check if user already interacted
-    const hasInteracted = sessionStorage.getItem('videoInteraction') === 'true';
-    
+
+    const hasInteracted = sessionStorage.getItem("videoInteraction") === "true";
     if (hasInteracted || !isSafariOrIOS()) {
       setUserInteracted(true);
     } else {
-      // Set up interaction listeners for Safari/iOS
       const handleInteraction = () => {
         setUserInteracted(true);
-        sessionStorage.setItem('videoInteraction', 'true');
-        document.removeEventListener('touchstart', handleInteraction);
-        document.removeEventListener('click', handleInteraction);
+        sessionStorage.setItem("videoInteraction", "true");
+        document.removeEventListener("touchstart", handleInteraction);
+        document.removeEventListener("click", handleInteraction);
       };
-      
-      document.addEventListener('touchstart', handleInteraction, { passive: true });
-      document.addEventListener('click', handleInteraction);
-      
+      document.addEventListener("touchstart", handleInteraction, { passive: true });
+      document.addEventListener("click", handleInteraction);
       return () => {
-        document.removeEventListener('touchstart', handleInteraction);
-        document.removeEventListener('click', handleInteraction);
+        document.removeEventListener("touchstart", handleInteraction);
+        document.removeEventListener("click", handleInteraction);
       };
     }
   }, [isClient, isSafariOrIOS]);
 
-  // Sync with theme context when it loads
+  // Sync with theme context when it loads (no functional change)
   useEffect(() => {
     if (isThemeLoaded && initialThemeDetected) {
-      const newTheme = isDarkMode ? 'dark' : 'light';
-      if (newTheme !== clientTheme) {
-        setClientTheme(newTheme);
-        setActiveVideo(newTheme);
-      }
+      const t: ThemeKey = isDarkMode ? "dark" : "light";
+      if (t !== clientTheme) setClientTheme(t);
     }
   }, [isDarkMode, isThemeLoaded, initialThemeDetected, clientTheme]);
 
-  // Optimized video loading function
-  const loadVideo = useCallback(async (videoRef: React.RefObject<HTMLVideoElement | null>, type: 'light' | 'dark') => {
-    const video = videoRef.current;
-    if (!video || !userInteracted) return;
+  // Attach a single loadeddata listener per element; no .load() (prevents buffer flush)
+  useEffect(() => {
+    if (!isClient) return;
 
-    try {
-      video.load();
-      
-      // Set up promise-based loading
-      await new Promise<void>((resolve, reject) => {
-        const onCanPlay = () => {
-          video.removeEventListener('canplaythrough', onCanPlay);
-          video.removeEventListener('error', onError);
-          resolve();
-        };
-        
-        const onError = () => {
-          video.removeEventListener('canplaythrough', onCanPlay);
-          video.removeEventListener('error', onError);
-          reject();
-        };
-        
-        video.addEventListener('canplaythrough', onCanPlay);
-        video.addEventListener('error', onError);
-        
-        // Timeout fallback
-        setTimeout(() => {
-          video.removeEventListener('canplaythrough', onCanPlay);
-          video.removeEventListener('error', onError);
-          resolve();
-        }, 3000);
-      });
+    const attach = (el: HTMLVideoElement | null, key: ThemeKey) => {
+      if (!el) return;
+      const onLoaded = () => {
+        setVideoReady((p) => (p[key] ? p : { ...p, [key]: true }));
+      };
+      el.addEventListener("loadeddata", onLoaded, { once: true });
+      // If already buffered (bfcache/back nav)
+      if (el.readyState >= 2) setVideoReady((p) => (p[key] ? p : { ...p, [key]: true }));
+      return () => el.removeEventListener("loadeddata", onLoaded);
+    };
 
-      // Play video with error handling
-      const playPromise = video.play();
-      if (playPromise) {
-        await playPromise.catch(() => {
-          // Retry once for Safari
-          setTimeout(() => video.play().catch(() => {}), 100);
-        });
-      }
+    const c1 = attach(lightVideoRef.current, "light");
+    const c2 = attach(darkVideoRef.current, "dark");
+    return () => {
+      c1 && c1();
+      c2 && c2();
+    };
+  }, [isClient]);
 
-      setVideoReady(prev => ({ ...prev, [type]: true }));
-    } catch {
-      // Fallback to poster on error
-      setVideoReady(prev => ({ ...prev, [type]: false }));
-    }
-  }, [userInteracted]);
+  // === Resource hints (tiny but free wins) ===
+  useEffect(() => {
+    if (!isClient) return;
+    // Preconnect to Cloudinary
+    const pc = document.createElement("link");
+    pc.rel = "preconnect";
+    pc.href = "https://res.cloudinary.com";
+    pc.crossOrigin = "";
+    document.head.appendChild(pc);
 
-  // Initialize both videos when user interacts
+    // Preload only the active theme video
+    const href = VIDEO_ASSETS[clientTheme].video + ".mp4"; // Cloudinary serves mp4; explicit helps preloader
+    const pl = document.createElement("link");
+    pl.rel = "preload";
+    pl.as = "video";
+    pl.href = href;
+    pl.crossOrigin = "anonymous";
+    document.head.appendChild(pl);
+
+    return () => {
+      try {
+        document.head.removeChild(pc);
+        document.head.removeChild(pl);
+      } catch {}
+    };
+  }, [isClient, clientTheme]);
+
+  // Start the active theme when ready; pause the hidden one
   useEffect(() => {
     if (!isClient || !userInteracted || !initialThemeDetected) return;
 
-    const initializeVideos = async () => {
-      // Load both videos in parallel
-      await Promise.allSettled([
-        loadVideo(lightVideoRef, 'light'),
-        loadVideo(darkVideoRef, 'dark')
-      ]);
+    const activeRef = clientTheme === "light" ? lightVideoRef.current : darkVideoRef.current;
+    const hiddenRef = clientTheme === "light" ? darkVideoRef.current : lightVideoRef.current;
+
+    // never decode two streams
+    pauseEl(hiddenRef);
+
+    // policy: poster-only for reduced motion / data saver
+    if (reducedMotion || saveData) {
+      pauseEl(activeRef);
+      setActiveVideo(clientTheme);
+      setNeedsTap(false);
+      return;
+    }
+
+    const startIfReady = async () => {
+      if (videoReady[clientTheme] && activeRef) {
+        const ok = await safePlay(activeRef);
+        setNeedsTap(!ok);
+        setActiveVideo(clientTheme);
+      }
     };
+    void startIfReady();
+  }, [
+    isClient,
+    userInteracted,
+    initialThemeDetected,
+    clientTheme,
+    videoReady.light,
+    videoReady.dark,
+    reducedMotion,
+    saveData,
+    safePlay,
+  ]);
 
-    initializeVideos();
-  }, [isClient, userInteracted, initialThemeDetected, loadVideo]);
-
-  // Handle theme switching with smooth transitions
+  // Theme switch crossfade — pause hidden, brief will-change for smoothness
   useEffect(() => {
     if (!initialThemeDetected || !userInteracted) return;
+    const next: ThemeKey = clientTheme;
+    if (next === activeVideo) return;
 
-    const newActiveVideo = clientTheme;
-    
-    if (newActiveVideo !== activeVideo) {
-      // Clear any pending transitions
-      if (transitionTimeoutRef.current) {
-        clearTimeout(transitionTimeoutRef.current);
-      }
+    if (transitionTimeoutRef.current) clearTimeout(transitionTimeoutRef.current);
 
-      // Smooth transition logic
-      const currentRef = activeVideo === 'light' ? lightVideoRef : darkVideoRef;
-      const nextRef = newActiveVideo === 'light' ? lightVideoRef : darkVideoRef;
+    const currentRef = activeVideo === "light" ? lightVideoRef : darkVideoRef;
+    const nextRef = next === "light" ? lightVideoRef : darkVideoRef;
 
-      if (currentRef.current) {
-        currentRef.current.style.opacity = '0';
-      }
+    // pause hidden immediately
+    pauseEl(currentRef.current);
 
-      if (nextRef.current && videoReady[newActiveVideo]) {
-        nextRef.current.style.opacity = '1';
+    // add short will-change to help compositor
+    if (currentRef.current) currentRef.current.style.willChange = "opacity";
+    if (nextRef.current) nextRef.current.style.willChange = "opacity";
+
+    if (currentRef.current) currentRef.current.style.opacity = "0";
+
+    const run = async () => {
+      if (nextRef.current && videoReady[next] && !(reducedMotion || saveData)) {
+        nextRef.current.style.opacity = "1";
         nextRef.current.currentTime = 0;
-        nextRef.current.play().catch(() => {});
+        const ok = await safePlay(nextRef.current);
+        setNeedsTap(!ok);
       }
+    };
+    void run();
 
-      // Update active video after transition
-      transitionTimeoutRef.current = setTimeout(() => {
-        setActiveVideo(newActiveVideo);
-      }, 300);
-    }
-  }, [clientTheme, initialThemeDetected, userInteracted, activeVideo, videoReady]);
+    transitionTimeoutRef.current = window.setTimeout(() => {
+      if (currentRef.current) currentRef.current.style.willChange = "";
+      if (nextRef.current) nextRef.current.style.willChange = "";
+      setActiveVideo(next);
+    }, 300);
 
-  // Cleanup on unmount
-  useEffect(() => {
     return () => {
       if (transitionTimeoutRef.current) {
         clearTimeout(transitionTimeoutRef.current);
+        transitionTimeoutRef.current = null;
       }
     };
-  }, []);
+  }, [
+    clientTheme,
+    initialThemeDetected,
+    userInteracted,
+    activeVideo,
+    videoReady,
+    reducedMotion,
+    saveData,
+    safePlay,
+  ]);
 
-  // Common video properties
-  const videoProps = {
+  // Pause on background; try resume on visible
+  useEffect(() => {
+    const onVis = () => {
+      const visible = document.visibilityState === "visible";
+      const activeRef = activeVideo === "light" ? lightVideoRef.current : darkVideoRef.current;
+      const hiddenRef = activeVideo === "light" ? darkVideoRef.current : lightVideoRef.current;
+
+      if (!visible) {
+        pauseEl(activeRef);
+        pauseEl(hiddenRef);
+      } else if (!(reducedMotion || saveData) && videoReady[activeVideo] && activeRef) {
+        void safePlay(activeRef);
+      }
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [activeVideo, videoReady, reducedMotion, saveData, safePlay]);
+
+  // Common props; preload is dynamic: active="auto", inactive="metadata"
+  const baseVideoProps = {
     muted: true,
     playsInline: true,
     loop: true,
-    preload: 'auto' as const,
     controls: false,
-  };
+    tabIndex: -1,
+    "aria-hidden": true,
+    disablePictureInPicture: true as unknown as boolean,
+    controlsList: "nodownload noplaybackrate nofullscreen",
+  } as const;
 
   const videoStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    pointerEvents: 'none',
-    transition: 'opacity 0.3s ease-in-out',
+    position: "absolute",
+    inset: 0,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    pointerEvents: "none",
+    transition: "opacity 0.3s ease-in-out",
   };
 
-  // SSR fallback - show nothing to prevent flash
+  // SSR fallback — poster only (prevents flash)
   if (!isClient || !initialThemeDetected) {
     return (
       <>
-        {/* Invisible placeholder during SSR/hydration */}
-        <div 
-          style={{ 
-            position: 'fixed', 
-            inset: 0, 
-            backgroundColor: 'transparent',
-            zIndex: -1 
-          }} 
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundImage: `url(${
+              clientTheme === "dark" ? VIDEO_ASSETS.dark.poster : VIDEO_ASSETS.light.poster
+            })`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            zIndex: -1,
+          }}
         />
         {children}
       </>
     );
   }
 
+  const showLight =
+    clientTheme === "light" && videoReady.light && userInteracted && !(reducedMotion || saveData);
+  const showDark =
+    clientTheme === "dark" && videoReady.dark && userInteracted && !(reducedMotion || saveData);
+
   return (
     <>
-      {/* Fixed video container - completely separate from content flow */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: -1, overflow: 'hidden' }}>
-        {/* Light theme video */}
+      {/* Fixed background container */}
+      <div style={{ position: "fixed", inset: 0, zIndex: -1, overflow: "hidden" }}>
+        {/* Light video */}
         <video
           ref={lightVideoRef}
           src={VIDEO_ASSETS.light.video}
           poster={VIDEO_ASSETS.light.poster}
-          {...videoProps}
-          style={{
-            ...videoStyle,
-            opacity: clientTheme === 'light' && videoReady.light && userInteracted ? 1 : 0,
-          }}
+          preload={clientTheme === "light" ? "auto" : "metadata"}
+          style={{ ...videoStyle, opacity: showLight ? 1 : 0 }}
+          {...baseVideoProps}
+          onLoadedData={() =>
+            setVideoReady((prev) => (prev.light ? prev : { ...prev, light: true }))
+          }
         />
-        
-        {/* Dark theme video */}
+
+        {/* Dark video */}
         <video
           ref={darkVideoRef}
           src={VIDEO_ASSETS.dark.video}
           poster={VIDEO_ASSETS.dark.poster}
-          {...videoProps}
-          style={{
-            ...videoStyle,
-            opacity: clientTheme === 'dark' && videoReady.dark && userInteracted ? 1 : 0,
-          }}
+          preload={clientTheme === "dark" ? "auto" : "metadata"}
+          style={{ ...videoStyle, opacity: showDark ? 1 : 0 }}
+          {...baseVideoProps}
+          onLoadedData={() =>
+            setVideoReady((prev) => (prev.dark ? prev : { ...prev, dark: true }))
+          }
         />
-        
-        {/* Fallback background - shows correct theme poster immediately */}
+
+        {/* Poster fallback stays until first decoded frame (or when policies require poster-only) */}
         <div
           style={{
-            position: 'absolute',
+            position: "absolute",
             inset: 0,
-            backgroundImage: `url(${clientTheme === 'dark' ? VIDEO_ASSETS.dark.poster : VIDEO_ASSETS.light.poster})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            opacity: (!videoReady.light && clientTheme === 'light') || (!videoReady.dark && clientTheme === 'dark') || !userInteracted ? 1 : 0,
-            transition: 'opacity 0.3s ease-in-out',
+            backgroundImage: `url(${
+              clientTheme === "dark" ? VIDEO_ASSETS.dark.poster : VIDEO_ASSETS.light.poster
+            })`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            opacity:
+              (!videoReady.light && clientTheme === "light") ||
+              (!videoReady.dark && clientTheme === "dark") ||
+              !userInteracted ||
+              reducedMotion ||
+              saveData
+                ? 1
+                : 0,
+            transition: "opacity 0.3s ease-in-out",
             zIndex: -1,
           }}
         />
+
+        {/* Tap-to-start only when autoplay is blocked (keeps iOS Safari flow unchanged) */}
+        {needsTap && !(reducedMotion || saveData) && (
+          <button
+            onClick={async () => {
+              const target =
+                clientTheme === "light" ? lightVideoRef.current : darkVideoRef.current;
+              const ok = await safePlay(target);
+              setNeedsTap(!ok);
+            }}
+            aria-label="Start background animation"
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              background: "transparent",
+              border: 0,
+              cursor: "pointer",
+            }}
+          />
+        )}
       </div>
 
-     
-
-      {/* Content - no wrapper div, just pass through children */}
       {children}
     </>
   );

@@ -51,8 +51,8 @@ const buildUrl = (source: unknown, width = 800): string | undefined => {
 /* ======= Banner (unchanged visuals) ======= */
 const CategoryBanner = memo(function CategoryBanner({
   category = 'New Arrivals',
-  title = 'Womens Collection',
-  subtitle = 'Discover our latest premium womenswear collection designed for the modern woman',
+  title = 'New Arrivals',
+  subtitle = 'Discover our latest premium collection featuring the newest additions to our store',
   className = '',
 }: {
   readonly category?: string;
@@ -180,7 +180,7 @@ ProductSkeleton.displayName = 'ProductSkeleton';
 /* =========================
    Page
    ========================= */
-const WomensCollection = memo(function WomensCollection() {
+const NewArrivals = memo(function NewArrivals() {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -192,7 +192,7 @@ const WomensCollection = memo(function WomensCollection() {
 
       // Return BOTH the direct url and full asset so we can always resolve
       const query = `*[_type == "product" &&
-        references(*[_type == "category" && title == "women-showcase"]._id) &&
+        references(*[_type == "category" && title == "new-arrivals"]._id) &&
         defined(images[0].asset)
       ] | order(_createdAt desc)[0...8]{
         _id,
@@ -263,6 +263,6 @@ const WomensCollection = memo(function WomensCollection() {
     </>
   );
 });
-WomensCollection.displayName = 'WomensCollection';
+NewArrivals.displayName = 'NewArrivals';
 
-export default WomensCollection;
+export default NewArrivals;

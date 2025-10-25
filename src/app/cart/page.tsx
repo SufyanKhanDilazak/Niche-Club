@@ -3,22 +3,21 @@
 
 import { useCart } from "../components/CartContext";
 import { useTheme } from "../components/theme-context";
-import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import type { CartItem } from "../components/Interface";
 import { toast } from "sonner";
 
 export default function CartPage() {
   const { cartItems, cartQuantity, addToCart, removeFromCart, clearCart } = useCart();
   const { isDarkMode } = useTheme();
-  const { isSignedIn } = useUser();
-  const router = useRouter();
+
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -26,17 +25,57 @@ export default function CartPage() {
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = subtotal > 100 ? 0 : 10;
-  const tax = subtotal * 0.08;
+  const taxRatePercent = 8; // keep your 8% rule
+  const tax = subtotal * (taxRatePercent / 100);
   const total = subtotal + shipping + tax;
 
-  const handleCheckout = () => {
-    if (!isSignedIn) {
-      toast.info("Please sign in to proceed to checkout");
-      setTimeout(() => router.push("/sign-in?redirectUrl=/checkout"), 1000);
-      return;
+  // ====== Checkout: DIRECT to Square (no /checkout page, no auth) ======
+  const toSquareLine = useCallback((item: CartItem) => {
+    return {
+      _id: item._id,
+      name: item.name,
+      price: Number(item.price),
+      quantity: Math.max(1, Number(item.quantity || 1)),
+      selectedSize: item.selectedSize,
+      selectedColor: item.selectedColor,
+      imageUrl: item.imageUrl,
+    };
+  }, []);
+
+  const handleCheckout = useCallback(async () => {
+    if (!cartItems || cartItems.length === 0 || isRedirecting) return;
+
+    try {
+      setIsRedirecting(true);
+      const items = cartItems.map(toSquareLine);
+
+      const res = await fetch("/api/square/create-payment-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // IMPORTANT: send ORDER-level tax & shipping so item count stays correct
+        body: JSON.stringify({
+          items,
+          taxRatePercent, // "8" -> order-level tax (does not add an item)
+          shipping,       // fixed amount via service_charge (does not add an item)
+        }),
+      });
+
+      const data = await res.json().catch(() => ({} as any));
+      const url = data?.payment_link?.url || data?.url || data?.checkoutUrl;
+
+      if (!res.ok || !url) {
+        toast.error(data?.error || "Failed to create Square checkout link");
+        setIsRedirecting(false);
+        return;
+      }
+
+      window.location.href = url;
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to create Square checkout link");
+      setIsRedirecting(false);
     }
-    router.push("/checkout");
-  };
+  }, [cartItems, isRedirecting, toSquareLine, taxRatePercent, shipping]);
 
   const handleIncrement = (item: (typeof cartItems)[0]) => {
     addToCart({ ...item, quantity: 1 });
@@ -78,7 +117,7 @@ export default function CartPage() {
             <p className={`${textSecondary} mb-8 text-sm sm:text-base max-w-md mx-auto`}>
               Looks like you haven&apos;t added anything to your cart yet. Start shopping to fill it up!
             </p>
-            <Link href="/categories/all_product">
+            <Link href="/">
               <Button className={`${primaryButton} text-white px-6 py-3 text-sm sm:text-base transition-all duration-300 hover:scale-105`}>
                 Continue Shopping
               </Button>
@@ -179,11 +218,12 @@ export default function CartPage() {
               </div>
             </div>
           </div>
+
           <div className={`${bgPrimary} backdrop-blur-md p-4 sm:p-6 rounded-lg ${border} h-fit sticky top-24`}>
             <h2 className={`text-lg sm:text-xl font-semibold mb-4 ${textPrimary}`}>Order Summary</h2>
             <div className="space-y-3">
               <div className={`flex justify-between text-sm sm:text-base ${textSubtle}`}>
-                <span>Subtotal ({cartQuantity} items)</span>
+                <span>Subtotal ({cartQuantity} {cartQuantity === 1 ? "item" : "items"})</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
               <div className={`flex justify-between text-sm sm:text-base ${textSubtle}`}>
@@ -193,7 +233,7 @@ export default function CartPage() {
                 </span>
               </div>
               <div className={`flex justify-between text-sm sm:text-base ${textSubtle}`}>
-                <span>Tax (8%)</span>
+                <span>Tax ({taxRatePercent}%)</span>
                 <span>${tax.toFixed(2)}</span>
               </div>
               <Separator className={`my-4 ${separator}`} />
@@ -211,9 +251,10 @@ export default function CartPage() {
             )}
             <Button
               onClick={handleCheckout}
-              className={`w-full mt-6 ${primaryButton} text-white py-3 text-sm sm:text-base font-medium transition-all duration-300 hover:scale-[1.02] hover:shadow-lg`}
+              disabled={cartItems.length === 0 || isRedirecting}
+              className={`w-full mt-6 ${primaryButton} text-white py-3 text-sm sm:text-base font-medium transition-all duration-300 hover:scale-[1.02] hover:shadow-lg disabled:opacity-50`}
             >
-              Proceed to Checkout
+              {isRedirecting ? "Redirecting…" : "Proceed to Checkout"}
             </Button>
             <div className="mt-4 text-center">
               <p className={`text-xs ${textMuted}`}>🔒 Secure checkout powered by SSL encryption</p>

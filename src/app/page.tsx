@@ -2,6 +2,8 @@ import { Suspense } from 'react'
 import HeroCarousel from './components/HeroCarousel'
 import MensCollection from './components/Mens-Collection'
 import WomensCollection from './components/Women-Collection'
+import NewArrivals from './components/New-Arrivals'
+import TrendingProducts from './components/Trending-Products'
 
 
 function HeroSkeleton() {
@@ -44,6 +46,17 @@ export default function Home() {
 
         <section className="w-full">
           <Suspense fallback={<HeroSkeleton />}>
+          <NewArrivals />
+          </Suspense>
+        </section>
+        <section className="w-full">
+          <Suspense fallback={<HeroSkeleton />}>
+          <TrendingProducts />
+          </Suspense>
+        </section>
+
+        <section className="w-full">
+          <Suspense fallback={<HeroSkeleton />}>
           <MensCollection />
           </Suspense>
         </section>
@@ -52,7 +65,6 @@ export default function Home() {
           <WomensCollection />
           </Suspense>
         </section>
-       
       </div>
 
       <div className="fixed inset-0 pointer-events-none z-[1] bg-gradient-to-b from-transparent via-transparent to-white/10 dark:to-black/10" />
