@@ -1,196 +1,112 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState, memo } from "react";
 import dynamic from "next/dynamic";
 
 const Hyperspeed = dynamic(() => import("./Hyperspeed"), { ssr: false });
 
 function hasWebGL(): boolean {
   try {
-    const canvas = document.createElement("canvas");
-    return !!(canvas.getContext("webgl") || canvas.getContext("experimental-webgl"));
+    const c = document.createElement("canvas");
+    return !!(c.getContext("webgl") || c.getContext("experimental-webgl"));
   } catch {
     return false;
   }
 }
 
-async function waitForVideos(timeoutMs: number = 3000): Promise<void> {
-  const videos = Array.from(document.querySelectorAll("video"));
-  if (videos.length === 0) return;
-  const timeout = new Promise<void>((resolve) => setTimeout(resolve, timeoutMs));
-  const checks = videos.map(
+async function waitForVideos(timeout = 3000) {
+  const vids = Array.from(document.querySelectorAll("video"));
+  if (!vids.length) return;
+  const timeoutP = new Promise<void>((r) => setTimeout(r, timeout));
+  const checks = vids.map(
     (v) =>
-      new Promise<void>((resolve) => {
-        if (v.readyState >= 3) return resolve();
-        const ready = () => {
-          v.removeEventListener("canplaythrough", ready);
-          v.removeEventListener("loadeddata", ready);
-          resolve();
-        };
-        v.addEventListener("canplaythrough", ready, { once: true });
-        v.addEventListener("loadeddata", ready, { once: true });
+      new Promise<void>((r) => {
+        if (v.readyState >= 3) return r();
+        const done = () => { v.removeEventListener("canplaythrough", done); v.removeEventListener("loadeddata", done); r(); };
+        v.addEventListener("canplaythrough", done, { once: true });
+        v.addEventListener("loadeddata", done, { once: true });
       })
   );
-  await Promise.race([Promise.all(checks), timeout]);
+  await Promise.race([Promise.all(checks), timeoutP]);
 }
+
+const Bg = memo(({ webglOk }: { webglOk: boolean }) => (
+  <div className="hs-stage">{webglOk ? <Hyperspeed /> : <div className="hs-fallback" />}</div>
+));
 
 export default function HyperspeedLoaderOnce() {
   const [show, setShow] = useState(true);
   const [ready, setReady] = useState(false);
   const [fade, setFade] = useState(false);
   const [webglOk, setWebglOk] = useState(true);
+  const ran = useRef(false);
+  const readyLatch = useRef(false);
 
   useEffect(() => {
-    if (localStorage.getItem("seenHyperspeedLoader") === "true") {
-      setShow(false);
-      return;
-    }
+    const boot = document.getElementById("hs-boot");
+    if (boot) boot.remove();
+    if (ran.current) return;
+    ran.current = true;
+
+    if (localStorage.getItem("seenHyperspeedLoader") === "true") { setShow(false); return; }
     setWebglOk(hasWebGL());
-    const run = async () => {
-      if (document.readyState !== "complete") {
-        await new Promise<void>((resolve) =>
-          window.addEventListener("load", () => resolve(), { once: true })
-        );
-      }
-      await waitForVideos(3000);
+
+    (async () => {
+      if (document.readyState !== "complete")
+        await new Promise<void>((res) => window.addEventListener("load", () => res(), { once: true }));
+      await waitForVideos();
       setReady(true);
-    };
-    run();
+      readyLatch.current = true;
+    })();
   }, []);
 
   if (!show) return null;
+  const showReady = readyLatch.current || ready;
 
-  const handleTapToEnter = () => {
-    if (!ready) return;
-    try {
-      sessionStorage.setItem("videoInteraction", "true");
-    } catch {}
-    setFade(true);
+  const handleTap = () => {
+    if (!showReady) return;
+    try { sessionStorage.setItem("videoInteraction", "true"); } catch {}
     localStorage.setItem("seenHyperspeedLoader", "true");
-    setTimeout(() => setShow(false), 900);
+    setFade(true);
+    setTimeout(() => setShow(false), 450);
   };
 
   return (
-    <div
-      className={`hs-loader ${fade ? "hs-loader--hide" : ""}`}
-      onClick={ready ? handleTapToEnter : undefined}
-    >
-      <div className="hs-stage">{webglOk ? <Hyperspeed /> : <div className="hs-fallback" />}</div>
-
+    <div className={`hs-loader ${fade ? "hs-loader--hide" : ""}`} onClick={showReady ? handleTap : undefined}>
+      <Bg webglOk={webglOk} />
       <div className="hs-overlay">
-        <div className="hs-title">{ready ? "Tap Anywhere to Enter" : "Loading Your Niche..."}</div>
+        <div className="hs-title">
+          <span style={{ opacity: showReady ? 0 : 1, transition: "opacity .26s ease" }}>
+            Loading Your Niche...
+          </span>
+          <span style={{ opacity: showReady ? 1 : 0, transition: "opacity .26s ease" }}>
+            Tap Anywhere to Enter
+          </span>
+        </div>
       </div>
 
       <style jsx global>{`
-  .hs-loader {
-    position: fixed;
-    inset: 0;
-    background: #000;
-    display: grid;
-    place-items: center;
-    z-index: 9999999;
-    opacity: 1;
-    /* faster, smoother fade; opacity only */
-    transition: opacity 0.45s ease;
-    will-change: opacity;
-    backface-visibility: hidden;
-  }
-  .hs-loader--hide {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Stage stays centered; no layout jank */
-  .hs-stage {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    display: grid;
-    place-items: center;
-    will-change: transform, opacity;
-    backface-visibility: hidden;
-    transform: translateZ(0);
-  }
-
-  /* Force whatever Hyperspeed renders (video/canvas/img) to be center-cover */
-  .hs-stage > *,
-  .hs-stage video,
-  .hs-stage canvas,
-  .hs-stage img {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); /* center from first paint */
-    width: 100vw;
-    height: 100vh;
-    max-width: none;
-    max-height: none;
-    object-fit: cover;
-    object-position: center center;
-  }
-  @media (max-aspect-ratio: 9/16) {
-    .hs-stage > *,
-    .hs-stage video,
-    .hs-stage canvas,
-    .hs-stage img {
-      min-width: 100vw;
-      min-height: 100vh;
-    }
-  }
-
-  /* Overlay text: locked dead-center from *first* paint */
-  .hs-overlay {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    text-align: center;
-    pointer-events: none;
-    padding: 0 4vw;
-  }
-
-  .hs-title {
-    color: #fff;
-    font-family: inherit;
-    font-weight: 600;
-    /* prevent font metrics jump */
-    line-height: 1;
-    letter-spacing: 0.02em;
-    font-size: clamp(1rem, 2.6vw, 1.6rem);
-    text-shadow: 0 0 8px #ffffff88;
-    /* IMPORTANT: no translateY on intro (removes snap/jump) */
-    opacity: 0;
-    will-change: opacity;
-    animation: fadeInOnly 320ms ease-out forwards, softPulse 1600ms ease-in-out 260ms infinite;
-  }
-
-  @keyframes fadeInOnly {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-
-  /* very light pulse using opacity only (no movement = no reflow) */
-  @keyframes softPulse {
-    0%, 100% { opacity: 0.94; }
-    50%      { opacity: 1; }
-  }
-
-  .hs-fallback {
-    width: 60px;
-    height: 60px;
-    border: 4px solid transparent;
-    border-top-color: #ffffff;
-    border-right-color: #ffffff;
-    border-radius: 50%;
-    animation: hsSpin 0.8s linear infinite;
-    margin: auto;
-  }
-  @keyframes hsSpin { to { transform: rotate(360deg); } }
-`}</style>
-
-
+        .hs-loader {
+          position: fixed;
+          inset: 0;
+          background: #000;
+          display: grid;
+          place-items: center;
+          z-index: 9999999;
+          opacity: 1;
+          transition: opacity 0.45s ease;
+        }
+        .hs-loader--hide { opacity: 0; pointer-events: none; }
+        .hs-stage {
+          position: absolute; inset: 0; display: grid; place-items: center;
+          overflow: hidden; contain: layout paint size; transform: translateZ(0);
+        }
+        .hs-stage > * { position: absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+          width:100vw; height:100vh; object-fit:cover; object-position:center; }
+        .hs-overlay { position:absolute; inset:0; display:grid; place-items:center; text-align:center; pointer-events:none; }
+        .hs-title { color:#fff; font-weight:600; letter-spacing:.02em; font-size:clamp(1rem,2.6vw,1.6rem); text-shadow:0 0 8px #fff8; display:inline-grid; }
+        .hs-fallback { width:60px; height:60px; border:4px solid transparent; border-top-color:#fff; border-right-color:#fff; border-radius:50%; animation:spin .8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
     </div>
   );
 }
