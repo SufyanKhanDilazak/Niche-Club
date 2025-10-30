@@ -113,11 +113,19 @@ export const product = defineType({
       initialValue: false
     }),
     defineField({
+      name: 'outOfStock',
+      title: 'Out of Stock',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Toggle ON to mark product as Out of Stock'
+    }),
+    defineField({
       name: 'inStock',
-      title: 'Stock Status',
+      title: 'In Stock (Legacy)',
       type: 'boolean',
       initialValue: true,
-      description: 'Toggle to set In Stock (true) or Out of Stock (false)'
+      description: '⚠️ DEPRECATED: Use "Out of Stock" toggle instead. This field is kept for backward compatibility.',
+      hidden: true
     }),
     defineField({
       name: 'sizes',
@@ -126,12 +134,22 @@ export const product = defineType({
       of: [{ type: 'string' }],
       options: {
         list: [
+          // Clothing Sizes
           { title: 'Extra Small', value: 'XS' },
           { title: 'Small', value: 'S' },
           { title: 'Medium', value: 'M' },
           { title: 'Large', value: 'L' },
           { title: 'Extra Large', value: 'XL' },
-          { title: 'XXL', value: 'XXL' }
+          { title: 'XXL', value: 'XXL' },
+          // Jeans Sizes
+          { title: 'W30 L30 (Waist 30" / Inseam 30")', value: 'W30-L30' },
+          { title: 'W30 L32 (Waist 30" / Inseam 32")', value: 'W30-L32' },
+          { title: 'W32 L30 (Waist 32" / Inseam 30")', value: 'W32-L30' },
+          { title: 'W32 L32 (Waist 32" / Inseam 32")', value: 'W32-L32' },
+          { title: 'W34 L30 (Waist 34" / Inseam 30")', value: 'W34-L30' },
+          { title: 'W34 L32 (Waist 34" / Inseam 32")', value: 'W34-L32' },
+          { title: 'W36 L30 (Waist 36" / Inseam 30")', value: 'W36-L30' },
+          { title: 'W36 L32 (Waist 36" / Inseam 32")', value: 'W36-L32' }
         ]
       },
       validation: (Rule) => Rule.unique()
@@ -207,13 +225,22 @@ export const product = defineType({
       title: 'name',
       media: 'images.0',
       subtitle: 'price',
-      inStock: 'inStock'
+      outOfStock: 'outOfStock',
+      onSale: 'onSale',
+      newArrival: 'newArrival'
     },
-    prepare({ title, media, subtitle, inStock }) {
+    prepare({ title, media, subtitle, outOfStock, onSale, newArrival }) {
+      const badges = [];
+      if (outOfStock) badges.push('OUT OF STOCK');
+      if (onSale) badges.push('ON SALE');
+      if (newArrival) badges.push('NEW');
+      
+      const badgeText = badges.length > 0 ? ` (${badges.join(', ')})` : '';
+      
       return {
         title,
         media,
-        subtitle: `$${subtitle}${!inStock ? ' (Out of Stock)' : ''}`
+        subtitle: `$${subtitle}${badgeText}`
       };
     }
   },

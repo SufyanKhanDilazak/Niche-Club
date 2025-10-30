@@ -199,22 +199,23 @@ export default function NicheEssentialsPage() {
       setError(null);
 
       const query = `*[_type == "product" && references(*[_type == "category" && title == "men-essentials"]._id)] | order(_createdAt desc) {
-        _id,
-        name,
-        slug,
-        price,
-        images[]{
-          "url": asset->url,
-          asset->{_id, url},
-          alt
-        },
-        description,
-        onSale,
-        newArrival,
-        sizes,
-        colors,
-        categories[]->{_id, title, slug}
-      }`;
+  _id,
+  name,
+  slug,
+  price,
+  images[]{
+    "url": asset->url,
+    asset->{_id, url},
+    alt
+  },
+  description,
+  onSale,
+  newArrival,
+  outOfStock,
+  sizes,
+  colors,
+  categories[]->{_id, title, slug}
+}`;
 
       const data = await client.fetch<IProduct[]>(query);
       setProducts(data);

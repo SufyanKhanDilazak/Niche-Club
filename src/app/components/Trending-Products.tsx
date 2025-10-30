@@ -27,6 +27,7 @@ interface IProduct {
   images: ProductImage[];
   onSale: boolean;
   newArrival: boolean;
+  outOfStock: boolean;
 }
 
 /* =========================
@@ -48,7 +49,7 @@ const buildUrl = (source: unknown, width = 800): string | undefined => {
   }
 };
 
-/* ======= Banner (unchanged visuals) ======= */
+/* ======= Banner with Image ======= */
 const CategoryBanner = memo(function CategoryBanner({
   category = 'Trending Now',
   title = 'Trending Products',
@@ -63,23 +64,24 @@ const CategoryBanner = memo(function CategoryBanner({
   return (
     <div className={`category-banner-container ${className}`}>
       <div className="category-banner">
-        <div className="banner-content">
-          <div className="category-tag">{category}</div>
-          <h1 className="banner-title">{title}</h1>
-          <p className="banner-subtitle">{subtitle}</p>
-        </div>
+        <Image
+          src="/featuredproducts.png"
+          alt="Featured Products Banner"
+          fill
+          className="banner-image"
+          style={{ objectFit: 'cover' }}
+          priority
+        />
       </div>
 
       <style jsx>{`
         .category-banner-container { width:100%; position:relative; overflow:hidden; border-radius:16px; margin:0 auto 1.5rem; }
-        .category-banner { position:relative; height:200px; background:transparent; backdrop-filter:blur(40px) saturate(180%); -webkit-backdrop-filter:blur(40px) saturate(180%); display:flex; align-items:center; justify-content:center; padding:40px; overflow:hidden; border:1px solid rgba(255,255,255,.1); }
-        .category-banner::before { content:''; position:absolute; inset:1px; background:rgba(255,255,255,.02); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-radius:15px; border:1px solid rgba(255,255,255,.05); z-index:1; }
-        .banner-content { position:relative; z-index:2; color:rgba(255,255,255,.9); text-align:center; max-width:500px; }
-        .category-tag { display:inline-block; background:rgba(255,255,255,.1); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:6px 16px; border-radius:50px; font-size:9px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; margin-bottom:20px; color:rgba(255,255,255,.8); border:1px solid rgba(255,255,255,.15); }
-        .banner-title { font-size:2rem; font-weight:600; margin-bottom:12px; color:rgba(255,255,255,.95); line-height:1.2; letter-spacing:-.01em; }
-        .banner-subtitle { font-size:.85rem; color:rgba(255,255,255,.7); line-height:1.5; max-width:350px; margin:0 auto; }
-        @media (max-width:768px){ .category-banner{ padding:25px 15px; height:140px } .banner-title{ font-size:1.5rem } .banner-subtitle{ font-size:.75rem; max-width:250px } .category-tag{ font-size:7px; padding:4px 12px } }
-        @media (max-width:480px){ .category-banner{ padding:20px 12px; height:120px } .banner-title{ font-size:1.3rem } .banner-subtitle{ font-size:.7rem; max-width:200px } .category-tag{ font-size:6px; padding:3px 10px } }
+        .category-banner { position:relative; height:200px; background:transparent; overflow:hidden; border:1px solid rgba(255,255,255,.1); }
+        @media (max-width:768px){ .category-banner{ height:140px } }
+        @media (max-width:480px){ .category-banner{ height:120px } }
+      `}</style>
+      <style jsx global>{`
+        .banner-image { border-radius:16px; }
       `}</style>
     </div>
   );
@@ -140,10 +142,11 @@ const ProductCard = memo(function ProductCard({ product, index }: { product: IPr
           </div>
         )}
 
-        {(product.newArrival || product.onSale) && (
+{(product.newArrival || product.onSale || product.outOfStock) && (
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {product.newArrival && <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-0.5 text-xs font-bold shadow-sm rounded-sm">NEW</span>}
             {product.onSale && <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-2 py-0.5 text-xs font-bold shadow-sm rounded-sm">SALE</span>}
+            {product.outOfStock && <span className="bg-gradient-to-r from-gray-600 to-gray-800 text-white px-2 py-0.5 text-xs font-bold shadow-sm rounded-sm">OUT OF STOCK</span>}
           </div>
         )}
       </div>
@@ -192,20 +195,21 @@ const TrendingProducts = memo(function TrendingProducts() {
 
       // Return BOTH the direct url and full asset so we can always resolve
       const query = `*[_type == "product" &&
-        references(*[_type == "category" && title == "trending-products"]._id) &&
-        defined(images[0].asset)
-      ] | order(_createdAt desc)[0...8]{
-        _id,
-        name,
-        price,
-        onSale,
-        newArrival,
-        images[]{
-          "url": asset->url,
-          asset,
-          alt
-        }
-      }`;
+  references(*[_type == "category" && title == "trending-products"]._id) &&
+  defined(images[0].asset)
+] | order(_createdAt desc)[0...8]{
+  _id,
+  name,
+  price,
+  onSale,
+  newArrival,
+  outOfStock,
+  images[]{
+    "url": asset->url,
+    asset,
+    alt
+  }
+}`;
 
       const data = await client.fetch<IProduct[]>(query);
       setProducts(data);

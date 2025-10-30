@@ -29,7 +29,7 @@ interface IProduct {
 type SortType = 'price-low' | 'price-high' | 'name';
 
 /* ========= Banner Image ========= */
-const BANNER_IMAGE = '/light1.png';
+const BANNER_IMAGE = '/denim.png';
 
 /* ========= Product Card ========= */
 const ProductCard = memo(({ product, index }: { product: IProduct; index: number }) => {
@@ -179,22 +179,23 @@ export default function MenDenimPage() {
       setError(null);
 
       const query = `*[_type == "product" && references(*[_type == "category" && title == "men-denim"]._id)] | order(_createdAt desc) {
-        _id,
-        name,
-        slug,
-        price,
-        images[]{
-          "url": asset->url,
-          asset->{_id,url},
-          alt
-        },
-        description,
-        onSale,
-        newArrival,
-        sizes,
-        colors,
-        categories[]->{_id,title,slug}
-      }`;
+  _id,
+  name,
+  slug,
+  price,
+  images[]{
+    "url": asset->url,
+    asset->{_id,url},
+    alt
+  },
+  description,
+  onSale,
+  newArrival,
+  outOfStock,
+  sizes,
+  colors,
+  categories[]->{_id,title,slug}
+}`;
 
       const data = await client.fetch<IProduct[]>(query);
       setProducts(data);

@@ -8,6 +8,9 @@ export interface IProduct {
   category: string;
   discountPercent: number;
   isNew: boolean;
+  onSale: boolean;
+  newArrival: boolean;
+  outOfStock: boolean; // Added this
   colors: string[];
   sizes: string[];
   additionalImages?: string[];
@@ -26,5 +29,8 @@ export interface CartItem {
   category?: string;
   discountPercent?: number;
   isNew?: boolean;
+  onSale?: boolean;
+  newArrival?: boolean;
+  outOfStock?: boolean; // Added this
   slug?: { current: string };
 }

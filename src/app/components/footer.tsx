@@ -61,13 +61,13 @@ export default function Footer() {
           
           <h4 className="text-xl font-bold pt-4">POLICIES</h4>
           <div className="space-y-2 flex flex-col items-center md:items-start">
-            <Link href="/privacy-policy" className="block text-blue-400 hover:text-blue-300">
+            <Link href="/privacypolicy" className="block text-blue-400 hover:text-blue-300">
               Privacy Policy
             </Link>
-            <Link href="/cookie-policy" className="block text-blue-400 hover:text-blue-300">
+            <Link href="/cookiepolicy" className="block text-blue-400 hover:text-blue-300">
               Cookie Policy
             </Link>
-            <Link href="/return-exchange" className="block text-blue-400 hover:text-blue-300">
+            <Link href="/returnexchange" className="block text-blue-400 hover:text-blue-300">
               Return & Exchange
             </Link>
           </div>

@@ -79,7 +79,7 @@ export default function HyperspeedLoaderOnce() {
             Loading Your Niche...
           </span>
           <span style={{ opacity: showReady ? 1 : 0, transition: "opacity .26s ease" }}>
-            Tap Anywhere to Enter
+            Tap to Enter <br /> Begin the Experience
           </span>
         </div>
       </div>
