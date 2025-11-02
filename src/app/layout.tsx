@@ -65,8 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Script>
       </head>
 
-      {/* change: min-h-screen -> min-h-dvh */}
-      <body className="min-h-dvh flex flex-col" style={{ backgroundColor: "var(--theme-bg)" }}>
+      <body className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--theme-bg)" }}>
         <div
           id="hs-boot"
           style={{
@@ -77,10 +76,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           <div className="hs-stage" />
           <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", textAlign: "center" }}>
-            <div style={{
-              color: "#fff", fontWeight: 600, letterSpacing: ".02em",
-              fontSize: "clamp(1rem,2.6vw,1.6rem)", textShadow: "0 0 8px rgba(255,255,255,.53)"
-            }}>
+            <div style={{ color: "#fff", fontWeight: 600, letterSpacing: ".02em",
+              fontSize: "clamp(1rem,2.6vw,1.6rem)", textShadow: "0 0 8px rgba(255,255,255,.53)" }}>
               Loading Your Niche...
             </div>
           </div>
@@ -93,8 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ThemeProvider>
               <AuroraStarsBackground>
                 <CartProvider>
-                  {/* change: min-h-screen -> min-h-0 flex-1 */}
-                  <div className="relative z-10 flex flex-col min-h-0 flex-1">
+                  <div className="relative z-10 flex flex-col min-h-screen">
                     <Header />
                     <HeadlineStrip />
                     <main className="flex-1">{children}</main>
