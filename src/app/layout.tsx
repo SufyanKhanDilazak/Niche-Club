@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   title: { default: "Niche Club - Premium Streetwear & Fashion", template: "%s | Niche Club" },
   description: "Discover exclusive streetwear and premium fashion at Niche Club.",
 };
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -49,8 +50,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.sanity.io" />
 
-        <link rel="preload" as="image" href="/sky-poster.jpg" media="(prefers-color-scheme: light)" />
-        <link rel="preload" as="image" href="/3d-poster.jpg" media="(prefers-color-scheme: dark)" />
+        {/* Single 3D poster preload */}
+        <link rel="preload" as="image" href="/3d-poster.jpg" />
 
         <Script id="theme-bootstrap" strategy="beforeInteractive">
           {`try{

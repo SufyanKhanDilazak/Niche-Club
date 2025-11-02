@@ -314,10 +314,10 @@ export default function ProductReviews({ productId, productName }: ProductReview
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-black dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-white dark:text-white mb-2">
             Customer Reviews
           </h2>
-          <p className="text-black/70 dark:text-white/70">
+          <p className="text-white dark:text-white">
             What our customers are saying about {productName}
           </p>
         </div>
@@ -426,7 +426,7 @@ export default function ProductReviews({ productId, productName }: ProductReview
             <h3 className="text-lg font-semibold text-black dark:text-white mb-2">
               No reviews yet
             </h3>
-            <p className="text-black/70 dark:text-white/70">
+            <p className="text-white dark:text-white">
               Be the first to review {productName}
             </p>
           </div>

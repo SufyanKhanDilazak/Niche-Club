@@ -98,7 +98,7 @@ export function Header() {
 
   const handleCheckout = useCallback(() => {
     setIsCartSheetOpen(false);
-    router.push('/checkout');
+    router.push('/cart');
   }, [router]);
 
   const handleClearCart = useCallback(() => clearCart(), [clearCart]);

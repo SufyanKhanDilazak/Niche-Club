@@ -44,7 +44,7 @@ export default function Contact() {
 
   // Color scheme adjustments (matched with About page)
   const headerColor = isDarkMode ? 'from-[#a90068] to-[#a90068]' : 'from-blue-500 to-blue-600';
-  const textColor = isDarkMode ? 'text-white' : 'text-gray-900';
+  const textColor = isDarkMode ? 'text-white' : 'text-white';
   const accentColor = isDarkMode ? 'text-[#a90068]' : 'text-blue-500';
   const accentHoverColor = isDarkMode ? 'hover:text-[#a90068]/80' : 'hover:text-blue-400';
   const buttonColor = isDarkMode ? 'from-[#a90068] to-[#a90068]' : 'from-blue-500 to-blue-600';

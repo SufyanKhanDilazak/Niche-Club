@@ -11,6 +11,7 @@ const customSlugify = (input: string): string => {
     'women_showcase': 'women-showcase',
     'trending_products': 'trending-products',
     'new_arrivals': 'new-arrivals',
+    'preview': 'preview',
   };
   
   // If input exists in slugMap, return mapped value
@@ -54,7 +55,8 @@ export const categorySchema = defineType({
           { title: 'Men_Showcase', value: 'men-showcase' },
           { title: 'Women_Showcase', value: 'women-showcase' },
           { title: 'Trending_Products', value: 'trending-products' },
-          { title: 'New_Arrivals', value: 'new-arrivals' }
+          { title: 'New_Arrivals', value: 'new-arrivals' },
+          { title: 'Preview', value: 'preview' }
         ],
         layout: 'dropdown'
       },

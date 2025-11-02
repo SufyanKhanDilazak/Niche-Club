@@ -137,7 +137,7 @@ const ProductCard = memo(function ProductCard({ product, index }: { product: IPr
             unoptimized={true}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm font-light bg-transparent">
+          <div className="w-full h-full flex items-center justify-center text-white-400 text-sm font-light bg-transparent">
             No Image
           </div>
         )}
@@ -153,8 +153,8 @@ const ProductCard = memo(function ProductCard({ product, index }: { product: IPr
 
       <div className="mt-2">
         <div className="border border-blue-500 dark:border-[#a90068] bg-transparent p-2 text-center transition-colors duration-200 group-hover:border-opacity-80">
-          <h4 className="text-sm md:text-base text-black dark:text-white truncate font-light mb-1">{product.name}</h4>
-          <p className="text-sm md:text-base text-black dark:text-white font-light">${product.price.toFixed(2)}</p>
+          <h4 className="text-sm md:text-base text-white dark:text-white truncate font-light mb-1">{product.name}</h4>
+          <p className="text-sm md:text-base text-white dark:text-white font-light">${product.price.toFixed(2)}</p>
         </div>
       </div>
     </Link>
@@ -255,7 +255,7 @@ const WomensCollection = memo(function WomensCollection() {
                 </div>
               ) : products.length === 0 ? (
                 <div className="col-span-full text-center py-6">
-                  <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base font-light">No products found</p>
+                  <p className="text-white-500 dark:text-white-400 text-sm sm:text-base font-light">No products found</p>
                 </div>
               ) : (
                 grid

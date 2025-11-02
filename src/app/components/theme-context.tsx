@@ -31,9 +31,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const currentTheme = theme === 'system' ? resolvedTheme : theme;
   const isDarkMode = currentTheme === 'dark';
 
-  /**
-   * Apply CSS variables & theme-color meta
-   */
   const updateThemeVariables = useCallback((isDark: boolean) => {
     const root = document.documentElement;
 
@@ -43,22 +40,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
       const properties: Record<string, string> = isDark
         ? {
-            '--theme-primary': '#a90068', // dark = pink
+            '--theme-primary': '#a90068',
             '--theme-primary-hover': '#8a0055',
             '--theme-bg': '#0f0f23',
             '--theme-surface': '#1a1a2e',
-            '--theme-text': '#ffffff',
-            '--theme-text-muted': '#94a3b8',
+            '--theme-text': '#ffffff',          // ✅ ALWAYS WHITE
+            '--theme-text-muted': '#ffffff',    // ✅ ALWAYS WHITE MUTED (optional)
             '--theme-border': '#374151',
             '--theme-accent': '#a90068',
           }
         : {
-            '--theme-primary': '#3b82f6', // light = blue
+            '--theme-primary': '#3b82f6',
             '--theme-primary-hover': '#2563eb',
             '--theme-bg': '#ffffff',
             '--theme-surface': '#f8fafc',
-            '--theme-text': '#000000',
-            '--theme-text-muted': '#64748b',
+            '--theme-text': '#ffffff',          // ✅ ALWAYS WHITE
+            '--theme-text-muted': '#ffffff',    // ✅ ALWAYS WHITE MUTED (optional)
             '--theme-border': '#e5e7eb',
             '--theme-accent': '#3b82f6',
           };
@@ -67,15 +64,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         root.style.setProperty(key, value);
       });
 
-      // update <meta name="theme-color"> for mobile browser chrome
       const meta = document.querySelector('meta[name="theme-color"]');
       if (meta) meta.setAttribute('content', isDark ? '#0f0f23' : '#ffffff');
     });
   }, []);
 
-  /**
-   * Detect and set initial theme (avoids flash)
-   */
   useEffect(() => {
     if (typeof window !== 'undefined' && !initialThemeSet) {
       const storedTheme = localStorage.getItem('theme');
@@ -90,7 +83,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
       updateThemeVariables(initialTheme === 'dark');
 
-      // only tell next-themes if not already same
       if (theme !== initialTheme) {
         setTheme(initialTheme);
       }
@@ -100,18 +92,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [theme, setTheme, updateThemeVariables, initialThemeSet]);
 
-  /**
-   * Sync variables when theme changes
-   */
   useEffect(() => {
     if (currentTheme && initialThemeSet) {
       updateThemeVariables(isDarkMode);
     }
   }, [currentTheme, isDarkMode, updateThemeVariables, initialThemeSet]);
 
-  /**
-   * Toggle theme
-   */
   const toggleTheme = useCallback(() => {
     const next = isDarkMode ? 'light' : 'dark';
     updateThemeVariables(!isDarkMode);

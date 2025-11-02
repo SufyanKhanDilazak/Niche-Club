@@ -117,11 +117,11 @@ const ProductCard = memo(({ product, index }: { product: IProduct; index: number
               }`}
             />
             <div className="relative z-10">
-              <h4 className="text-sm sm:text-base font-light text-black dark:text-white truncate mb-2">
+              <h4 className="text-sm sm:text-base font-light text-white dark:text-white truncate mb-2">
                 {product.name}
               </h4>
               <div className="flex items-center justify-center gap-2">
-                <p className="text-sm sm:text-base font-medium text-black dark:text-white group-hover:scale-105 transition-transform">
+                <p className="text-sm sm:text-base font-medium text-white dark:text-white group-hover:scale-105 transition-transform">
                   ${product.price.toFixed(2)}
                 </p>
                 {(product.onSale || product.newArrival) && (

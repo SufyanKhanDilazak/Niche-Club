@@ -207,7 +207,7 @@ export default function CartPage() {
                   <Trash2 className="h-4 w-4" />
                   Clear Cart
                 </Button>
-                <Link href="/categories/all_products" className="w-full sm:w-auto">
+                <Link href="/" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
                     className={`w-full ${isHydrated && isDarkMode ? "bg-black/50" : "bg-white/50"} backdrop-blur-sm ${outlineButton} transition-all duration-300`}

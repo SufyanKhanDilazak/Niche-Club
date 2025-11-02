@@ -32,7 +32,7 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ end, label, isPercent
     return () => clearInterval(timer);
   }, [end]);
 
-  const textColor = isDarkMode ? 'text-white' : 'text-gray-900';
+  const textColor = isDarkMode ? 'text-white' : 'text-white';
   const gradientColor = isDarkMode ? 'from-[#a90068] to-[#a90068]' : 'from-blue-500 to-blue-600';
 
   return (
@@ -136,7 +136,7 @@ const AboutPage: React.FC = () => {
     { end: 98, label: 'Satisfaction Rate', isPercentage: true },
   ];
 
-  const textColor = isDarkMode ? 'text-white' : 'text-gray-900';
+  const textColor = isDarkMode ? 'text-white' : 'text-white';
   const accentColor = isDarkMode ? 'text-[#a90068]' : 'text-blue-500';
   const buttonGradient = isDarkMode ? 'from-[#a90068] to-[#a90068]' : 'from-blue-500 to-blue-600';
   const borderColor = isDarkMode ? 'border-gray-800/10' : 'border-white/10';

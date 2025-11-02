@@ -190,15 +190,15 @@ export default function ProductClient({ product, relatedProducts }: Props) {
         {/* Breadcrumb */}
         <nav className="mb-8">
           <div className="flex items-center space-x-2 text-sm font-medium">
-            <Link href="/" className="text-black hover:text-blue-500 dark:text-white dark:hover:text-[#a90068]">
+            <Link href="/" className="text-white hover:text-blue-500 dark:text-white dark:hover:text-[#a90068]">
               Home
             </Link>
-            <ChevronRight className="h-4 w-4 text-black dark:text-white" />
-            <Link href="/products" className="text-black hover:text-blue-500 dark:text-white dark:hover:text-[#a90068]">
+            <ChevronRight className="h-4 w-4 text-white dark:text-white" />
+            <Link href="/products" className="text-white hover:text-blue-500 dark:text-white dark:hover:text-[#a90068]">
               Products
             </Link>
-            <ChevronRight className="h-4 w-4 text-black dark:text-white" />
-            <span className="font-semibold text-black dark:text-white">{product.name}</span>
+            <ChevronRight className="h-4 w-4 text-white dark:text-white" />
+            <span className="font-semibold text-white dark:text-white">{product.name}</span>
           </div>
         </nav>
 
@@ -219,7 +219,7 @@ export default function ProductClient({ product, relatedProducts }: Props) {
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
-                  <Eye className="h-10 w-10 text-black dark:text-white" />
+                  <Eye className="h-10 w-10 text-white dark:text-white" />
                 </div>
               )}
 
@@ -286,7 +286,7 @@ export default function ProductClient({ product, relatedProducts }: Props) {
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center">
-                        <Eye className="h-6 w-6 text-black dark:text-white" />
+                        <Eye className="h-6 w-6 text-white dark:text-white" />
                       </div>
                     )}
                   </button>
@@ -300,7 +300,7 @@ export default function ProductClient({ product, relatedProducts }: Props) {
             <div className="space-y-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1 space-y-3">
-                  <h1 className="text-3xl font-bold leading-tight text-black dark:text-white lg:text-4xl">
+                  <h1 className="text-3xl font-bold leading-tight text-white dark:text-white lg:text-4xl">
                     {product.name}
                   </h1>
 
@@ -310,11 +310,11 @@ export default function ProductClient({ product, relatedProducts }: Props) {
                         <Star
                           key={i}
                           className={`h-4 w-4 ${
-                            i < 4 ? 'fill-current text-yellow-400' : 'text-black/30 dark:text-white/30'
+                            i < 4 ? 'fill-current text-yellow-400' : 'text-white/30 dark:text-white/30'
                           }`}
                         />
                       ))}
-                      <span className="ml-2 text-sm text-black dark:text-white">
+                      <span className="ml-2 text-sm text-white dark:text-white">
                         (124 reviews)
                       </span>
                     </div>
@@ -352,11 +352,11 @@ export default function ProductClient({ product, relatedProducts }: Props) {
               {/* Price + categories */}
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
-                  <span className="text-3xl font-bold text-black dark:text-white">
+                  <span className="text-3xl font-bold text-white dark:text-white">
                     ${product.price}
                   </span>
                   {product.onSale && (
-                    <span className="text-xl font-semibold text-black/60 line-through dark:text-white/60">
+                    <span className="text-xl font-semibold text-white/60 line-through dark:text-white/60">
                       ${(product.price * 1.2).toFixed(2)}
                     </span>
                   )}
@@ -368,7 +368,7 @@ export default function ProductClient({ product, relatedProducts }: Props) {
                       <Link
                         key={category._id}
                         href={`/category/${category.slug.current}`}
-                        className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-black transition-all hover:bg-blue-100 dark:bg-[#a90068]/20 dark:text-white dark:hover:bg-[#a90068]/30"
+                        className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-[#3b82f6] transition-all hover:bg-blue-100 dark:bg-[#a90068]/20 dark:text-white dark:hover:bg-[#a90068]/30"
                       >
                         {category.title}
                       </Link>
@@ -383,12 +383,12 @@ export default function ProductClient({ product, relatedProducts }: Props) {
             {/* Description */}
             {!!product.description && (
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-black dark:text-white">
+                <h3 className="text-lg font-semibold text-white dark:text-white">
                   Description
                 </h3>
                 <div className="prose prose-gray max-w-none dark:prose-invert">
                   <p
-                    className={`leading-relaxed text-black dark:text-white ${
+                    className={`leading-relaxed text-white dark:text-white ${
                       !showFullDescription && product.description.length > 200 ? 'line-clamp-3' : ''
                     }`}
                   >
@@ -409,7 +409,7 @@ export default function ProductClient({ product, relatedProducts }: Props) {
             {/* Sizes */}
             {!!product.sizes?.length && (
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-black dark:text-white">Size</h3>
+                <h3 className="text-lg font-semibold text-white dark:text-white">Size</h3>
                 <div className="grid grid-cols-6 gap-2">
                   {product.sizes.map((size) => {
                     const selected = selectedSize === size;
@@ -420,7 +420,7 @@ export default function ProductClient({ product, relatedProducts }: Props) {
                         className={`relative rounded-lg border-2 px-3 py-2 text-sm font-semibold transition-all ${
                           selected
                             ? 'border-blue-500 bg-blue-50 text-blue-700 dark:border-[#a90068] dark:bg-[#a90068]/20 dark:text-[#a90068]'
-                            : 'border-black/30 text-black hover:border-black/50 dark:border-white/30 dark:text-white dark:hover:border-white/50'
+                            : 'border-black/30 text-white hover:border-black/50 dark:border-white/30 dark:text-white dark:hover:border-white/50'
                         }`}
                       >
                         {size}
@@ -439,7 +439,7 @@ export default function ProductClient({ product, relatedProducts }: Props) {
             {/* Colors */}
             {!!product.colors?.length && (
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-black dark:text-white">Color</h3>
+                <h3 className="text-lg font-semibold text-white dark:text-white">Color</h3>
                 <div className="flex flex-wrap gap-2">
                   {product.colors.map((color) => {
                     const selected = selectedColor === color;
@@ -450,7 +450,7 @@ export default function ProductClient({ product, relatedProducts }: Props) {
                         className={`relative rounded-lg border-2 px-4 py-2 text-sm font-semibold capitalize transition-all ${
                           selected
                             ? 'border-blue-500 bg-blue-50 text-blue-700 dark:border-[#a90068] dark:bg-[#a90068]/20 dark:text-[#a90068]'
-                            : 'border-black/30 text-black hover:border-black/50 dark:border-white/30 dark:text-white dark:hover:border-white/50'
+                            : 'border-black/30 text-white hover:border-black/50 dark:border-white/30 dark:text-white dark:hover:border-white/50'
                         }`}
                       >
                         {color}
@@ -468,29 +468,29 @@ export default function ProductClient({ product, relatedProducts }: Props) {
 
             {/* Quantity */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-black dark:text-white">Quantity</h3>
+              <h3 className="text-lg font-semibold text-white dark:text-white">Quantity</h3>
               <div className="flex items-center gap-4">
                 <div className="flex items-center overflow-hidden rounded-lg border-2 border-black/30 dark:border-white/30">
                   <button
                     onClick={() => adjustQuantity(-1)}
-                    className="px-3 py-2 text-black transition-colors hover:bg-black/10 dark:text-white dark:hover:bg-white/10"
+                    className="px-3 py-2 text-white transition-colors hover:bg-black/10 dark:text-white dark:hover:bg-white/10"
                     aria-label="Decrease quantity"
                     disabled={quantity <= 1}
                   >
                     <Minus className="h-4 w-4" />
                   </button>
-                  <span className="min-w-[3rem] border-x-2 border-black/30 px-4 py-2 text-center text-lg font-semibold text-black dark:border-white/30 dark:text-white">
+                  <span className="min-w-[3rem] border-x-2 border-black/30 px-4 py-2 text-center text-lg font-semibold text-white dark:border-white/30 dark:text-white">
                     {quantity}
                   </span>
                   <button
                     onClick={() => adjustQuantity(1)}
-                    className="px-3 py-2 text-black transition-colors hover:bg-black/10 dark:text-white dark:hover:bg-white/10"
+                    className="px-3 py-2 text-white transition-colors hover:bg-black/10 dark:text-white dark:hover:bg-white/10"
                     aria-label="Increase quantity"
                   >
                     <Plus className="h-4 w-4" />
                   </button>
                 </div>
-                <div className="text-sm text-black dark:text-white">
+                <div className="text-sm text-white dark:text-white">
                   <span className="font-medium text-green-600 dark:text-green-400">✓ In Stock</span>
                   <br />
                   Ready to ship
@@ -545,7 +545,7 @@ export default function ProductClient({ product, relatedProducts }: Props) {
 
             {/* Why us */}
             <div className="rounded-lg border border-black/20 p-4 backdrop-blur-sm dark:border-white/20">
-              <h3 className="text-lg font-semibold text-black dark:text-white">Why Choose Us?</h3>
+              <h3 className="text-lg font-semibold text-white dark:text-white">Why Choose Us?</h3>
               <div className="mt-3 grid grid-cols-2 gap-3">
                 {[
                   { icon: Truck, title: 'Free Shipping', desc: 'On orders over $50' },
@@ -561,8 +561,8 @@ export default function ProductClient({ product, relatedProducts }: Props) {
                       <Icon className="h-4 w-4 text-blue-600 dark:text-[#a90068]" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-black dark:text-white">{title}</p>
-                      <p className="text-xs text-black dark:text-white">{desc}</p>
+                      <p className="text-sm font-semibold text-white dark:text-white">{title}</p>
+                      <p className="text-xs text-white dark:text-white">{desc}</p>
                     </div>
                   </div>
                 ))}
@@ -575,8 +575,8 @@ export default function ProductClient({ product, relatedProducts }: Props) {
         {relatedProducts.length > 0 && (
           <div className="mt-16">
             <div className="mb-8 text-center">
-              <h2 className="mb-2 text-2xl font-bold text-black dark:text-white">You Might Also Like</h2>
-              <p className="text-black dark:text.White">Discover more amazing products</p>
+              <h2 className="mb-2 text-2xl font-bold text-white dark:text-white">You Might Also Like</h2>
+              <p className="text-white dark:text.White">Discover more amazing products</p>
             </div>
 
             <div className="rounded-2xl border border-black/20 p-6 backdrop-blur-sm dark:border.White/20">
@@ -602,7 +602,7 @@ export default function ProductClient({ product, relatedProducts }: Props) {
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">
-                            <Eye className="h-6 w-6 text-black dark:text.White" />
+                            <Eye className="h-6 w-6 text-white dark:text.White" />
                           </div>
                         )}
 
@@ -622,10 +622,10 @@ export default function ProductClient({ product, relatedProducts }: Props) {
 
                       <div className="mt-3">
                         <div className="border border-blue-500 p-2 text-center transition-all duration-300 group-hover:border-opacity-80 dark:border-[#a90068]">
-                          <h4 className="mb-1 truncate text-sm font-light text-black dark:text.White sm:text-base md:text-lg">
+                          <h4 className="mb-1 truncate text-sm font-light text-white dark:text.White sm:text-base md:text-lg">
                             {rp.name}
                           </h4>
-                          <p className="text-sm font-light text-black dark:text.White sm:text-base md:text-lg">
+                          <p className="text-sm font-light text-white dark:text.White sm:text-base md:text-lg">
                             ${rp.price.toFixed(2)}
                           </p>
                         </div>
