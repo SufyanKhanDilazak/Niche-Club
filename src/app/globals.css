@@ -95,3 +95,12 @@ input, select, textarea, button { font-size: max(16px, 1rem); }
   visibility: hidden !important;
 }
 :root[data-hs-skip="1"] #hs-boot { display: none !important; }
+video {
+  object-fit: cover !important;
+  object-position: center center !important;
+  image-rendering: auto !important;
+}
+/* high DPI */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  video { image-rendering: -webkit-optimize-contrast !important; }
+}
