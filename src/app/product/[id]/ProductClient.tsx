@@ -5,7 +5,6 @@ import { useState, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import ProductReviews from '../../components/ProductReviews';
 import { urlFor } from '@/sanity/lib/image';
 import { CartItem } from '../../components/Interface';
 import { useCart } from '../../components/CartContext';
@@ -637,9 +636,6 @@ export default function ProductClient({ product, relatedProducts }: Props) {
             </div>
           </div>
         )}
-
-        {/* Reviews */}
-        <ProductReviews productId={product._id} productName={product.name} />
       </div>
     </div>
   );
