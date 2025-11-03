@@ -71,7 +71,7 @@ export const HeadlineStrip = memo(() => {
 
   if (!isThemeLoaded) {
     return (
-      <div className="fixed top-20 left-0 w-full h-8 z-40 bg-gray-100" />
+      <div className="fixed top-[60px] left-0 w-full h-8 z-40 bg-gray-100" />
     );
   }
 
@@ -81,7 +81,7 @@ export const HeadlineStrip = memo(() => {
 
   return (
     <div
-      className="fixed top-20 left-0 w-full h-8 z-40 overflow-hidden shadow-sm"
+     className="fixed top-[65px] left-0 w-full h-8 z-40 overflow-hidden shadow-sm"
       style={{
         backgroundColor,
         color: textColor,

@@ -24,6 +24,7 @@ interface IProduct {
   sizes?: string[];
   colors?: string[];
   categories: ICategory[];
+  outOfStock: boolean;
 }
 
 type SortType = 'price-low' | 'price-high' | 'name';
@@ -73,8 +74,8 @@ const ProductCard = memo(({ product, index }: { product: IProduct; index: number
             </div>
           )}
 
-          {/* badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+         {/* badges */}
+         <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
             {product.newArrival && (
               <span className="relative bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-white px-3 py-1.5 text-xs font-bold shadow-xl rounded-full backdrop-blur-sm transform transition-all duration-300 hover:scale-105">
                 NEW
@@ -83,6 +84,11 @@ const ProductCard = memo(({ product, index }: { product: IProduct; index: number
             {product.onSale && (
               <span className="relative bg-gradient-to-r from-red-500 via-pink-500 to-rose-500 text-white px-3 py-1.5 text-xs font-bold shadow-xl rounded-full backdrop-blur-sm transform transition-all duration-300 hover:scale-105">
                 SALE
+              </span>
+            )}
+            {product.outOfStock && (
+              <span className="relative bg-gradient-to-r from-gray-600 via-gray-700 to-gray-800 text-white px-3 py-1.5 text-xs font-bold shadow-xl rounded-full backdrop-blur-sm transform transition-all duration-300 hover:scale-105">
+                OUT OF STOCK
               </span>
             )}
           </div>
@@ -109,7 +115,7 @@ const ProductCard = memo(({ product, index }: { product: IProduct; index: number
                 <p className="text-sm sm:text-base font-medium text-white dark:text-white group-hover:scale-105 transition-transform">
                   ${product.price.toFixed(2)}
                 </p>
-                {(product.onSale || product.newArrival) && (
+                {(product.onSale || product.newArrival || product.outOfStock) && (
                   <div className="w-1 h-1 bg-blue-500 dark:bg-[#a90068] rounded-full opacity-60" />
                 )}
               </div>
