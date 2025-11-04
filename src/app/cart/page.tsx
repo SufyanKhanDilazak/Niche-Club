@@ -1,4 +1,3 @@
-// app/cart/page.tsx
 "use client";
 
 import { useCart } from "../components/CartContext";
@@ -11,6 +10,7 @@ import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import type { CartItem } from "../components/Interface";
 import { toast } from "sonner";
+import { fbq } from "../../lib/fbq"; // ✅ Keep pixel tracking
 
 export default function CartPage() {
   const { cartItems, cartQuantity, addToCart, removeFromCart, clearCart } = useCart();
@@ -23,13 +23,17 @@ export default function CartPage() {
     setIsHydrated(true);
   }, []);
 
+  // ✅ Subtotal
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = subtotal > 100 ? 0 : 10;
-  const taxRatePercent = 8; // keep your 8% rule
-  const tax = subtotal * (taxRatePercent / 100);
-  const total = subtotal + shipping + tax;
 
-  // ====== Checkout: DIRECT to Square (no /checkout page, no auth) ======
+  // ✅ New free-shipping rule
+  const shipping = subtotal >= 49 ? 0 : 3.99; // (Change 10 → Your default shipping cost)
+
+  // ✅ REMOVE manual cart tax — Square will auto-calc
+  const tax = 0;
+  const total = subtotal + shipping;
+
+  // ====== Checkout: DIRECT to Square ======
   const toSquareLine = useCallback((item: CartItem) => {
     return {
       _id: item._id,
@@ -43,6 +47,12 @@ export default function CartPage() {
   }, []);
 
   const handleCheckout = useCallback(async () => {
+    // ✅ Pixel tracking
+    fbq("track", "InitiateCheckout", {
+      value: subtotal,
+      currency: "USD",
+    });
+
     if (!cartItems || cartItems.length === 0 || isRedirecting) return;
 
     try {
@@ -52,11 +62,10 @@ export default function CartPage() {
       const res = await fetch("/api/square/create-payment-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // IMPORTANT: send ORDER-level tax & shipping so item count stays correct
+        // ✅ Shipping only. Tax handled automatically by Square.
         body: JSON.stringify({
           items,
-          taxRatePercent, // "8" -> order-level tax (does not add an item)
-          shipping,       // fixed amount via service_charge (does not add an item)
+          shipping,
         }),
       });
 
@@ -72,10 +81,10 @@ export default function CartPage() {
       window.location.href = url;
     } catch (err) {
       console.error(err);
-      toast.error("Failed to create Square checkout link");
+      toast.error("Checkout failed");
       setIsRedirecting(false);
     }
-  }, [cartItems, isRedirecting, toSquareLine, taxRatePercent, shipping]);
+  }, [cartItems, isRedirecting, toSquareLine, shipping, subtotal]);
 
   const handleIncrement = (item: (typeof cartItems)[0]) => {
     addToCart({ ...item, quantity: 1 });
@@ -115,7 +124,7 @@ export default function CartPage() {
             </div>
             <h1 className={`text-2xl sm:text-3xl font-bold mb-4 ${textPrimary}`}>Your Cart is Empty</h1>
             <p className={`${textSecondary} mb-8 text-sm sm:text-base max-w-md mx-auto`}>
-              Looks like you haven&apos;t added anything to your cart yet. Start shopping to fill it up!
+              Looks like you haven&apos;t added anything yet.
             </p>
             <Link href="/">
               <Button className={`${primaryButton} text-white px-6 py-3 text-sm sm:text-base transition-all duration-300 hover:scale-105`}>
@@ -131,6 +140,7 @@ export default function CartPage() {
   return (
     <div className="min-h-screen pt-16 sm:pt-20 px-4 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-sm mt-20">
       <div className="max-w-7xl mx-auto py-6 sm:py-8">
+
         <div className={`${bgPrimary} backdrop-blur-md rounded-lg ${border} p-4 sm:p-6 mb-6`}>
           <h1 className={`text-2xl sm:text-3xl font-bold ${textPrimary}`}>
             Shopping Cart
@@ -139,7 +149,9 @@ export default function CartPage() {
             </span>
           </h1>
         </div>
+
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8">
+
           <div className="xl:col-span-2 space-y-4">
             {cartItems.map((item) => (
               <div
@@ -188,11 +200,15 @@ export default function CartPage() {
                         <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                     </div>
-                    <p className={`text-sm sm:text-base font-semibold ${textPrimary}`}>${(item.price * item.quantity).toFixed(2)}</p>
+
+                    <p className={`text-sm sm:text-base font-semibold ${textPrimary}`}>
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </p>
                   </div>
                 </div>
               </div>
             ))}
+
             <div className={`${bgPrimary} backdrop-blur-md rounded-lg ${border} p-4 sm:p-6`}>
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <Button
@@ -207,6 +223,7 @@ export default function CartPage() {
                   <Trash2 className="h-4 w-4" />
                   Clear Cart
                 </Button>
+
                 <Link href="/" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
@@ -219,6 +236,7 @@ export default function CartPage() {
             </div>
           </div>
 
+          {/* ✅ Order Summary (unchanged UI — just numbers updated) */}
           <div className={`${bgPrimary} backdrop-blur-md p-4 sm:p-6 rounded-lg ${border} h-fit sticky top-24`}>
             <h2 className={`text-lg sm:text-xl font-semibold mb-4 ${textPrimary}`}>Order Summary</h2>
             <div className="space-y-3">
@@ -226,29 +244,33 @@ export default function CartPage() {
                 <span>Subtotal ({cartQuantity} {cartQuantity === 1 ? "item" : "items"})</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
+
               <div className={`flex justify-between text-sm sm:text-base ${textSubtle}`}>
                 <span>Shipping</span>
                 <span className={shipping === 0 ? `${isHydrated && isDarkMode ? "text-green-400" : "text-green-600"} font-medium` : ""}>
-                  {shipping === 0 ? "Free" : `${shipping.toFixed(2)}`}
+                  {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
                 </span>
               </div>
-              <div className={`flex justify-between text-sm sm:text-base ${textSubtle}`}>
-                <span>Tax ({taxRatePercent}%)</span>
-                <span>${tax.toFixed(2)}</span>
-              </div>
+
+              {/* ❌ Tax row removed (Square calculates automatically) */}
+
               <Separator className={`my-4 ${separator}`} />
+
               <div className={`flex justify-between text-lg sm:text-xl font-semibold ${textPrimary}`}>
                 <span>Total</span>
                 <span>${total.toFixed(2)}</span>
               </div>
             </div>
-            {subtotal < 100 && (
-              <div className={`mt-4 p-3 ${shippingNotice} backdrop-blur-sm rounded-lg border`}>
-                <p className="text-xs sm:text-sm text-center">
-                  💰 Add <span className="font-semibold">${(100 - subtotal).toFixed(2)}</span> more for free shipping!
-                </p>
-              </div>
-            )}
+
+            {subtotal < 49 && (
+  <div className={`mt-4 p-3 ${shippingNotice} backdrop-blur-sm rounded-lg border`}>
+    <p className="text-xs sm:text-sm text-center">
+      💰 Add <span className="font-semibold">${(49 - subtotal).toFixed(2)}</span> more for free shipping!
+    </p>
+  </div>
+)}
+
+
             <Button
               onClick={handleCheckout}
               disabled={cartItems.length === 0 || isRedirecting}
@@ -256,10 +278,12 @@ export default function CartPage() {
             >
               {isRedirecting ? "Redirecting…" : "Proceed to Checkout"}
             </Button>
+
             <div className="mt-4 text-center">
               <p className={`text-xs ${textMuted}`}>🔒 Secure checkout powered by SSL encryption</p>
             </div>
           </div>
+
         </div>
       </div>
     </div>

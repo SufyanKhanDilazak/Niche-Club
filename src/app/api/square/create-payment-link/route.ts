@@ -22,15 +22,16 @@ function cents(n: number | undefined | null) {
 export async function POST(req: Request) {
   try {
     const body = (await req.json().catch(() => ({}))) as {
-      item?: SingleItem;     // Product page usage
-      items?: CartItem[];    // Cart page usage
+      item?: SingleItem; 
+      items?: CartItem[];
       taxRatePercent?: number | string;
       shipping?: number;
     };
 
     const accessToken = process.env.SQUARE_ACCESS_TOKEN;
     const locationId  = process.env.SQUARE_LOCATION_ID;
-    const redirectUrl = process.env.CHECKOUT_REDIRECT_URL; // optional
+
+    const redirectUrl = `https://nicheclub.us/payment-success?orderId={ORDER_ID}`;
 
     if (!accessToken || !locationId) {
       return NextResponse.json(
@@ -39,9 +40,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const { item, items, taxRatePercent, shipping } = body;
+    const { item, items, shipping } = body;
 
-    // ✅ Build product line items
+    // ✅ Build product line items (unchanged)
     let line_items: any[] = [];
     if (item) {
       line_items.push({
@@ -63,43 +64,33 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No valid items provided.' }, { status: 400 });
     }
 
+    // ✅ Build order object (unchanged except tax removed)
     const order: any = {
       location_id: locationId,
       line_items,
     };
 
-    // ✅ Tax at order level — does NOT count as item
-    const taxPctStr =
-      taxRatePercent === 0 || taxRatePercent === '0'
-        ? undefined
-        : String(taxRatePercent ?? '');
+    // ✅ FREE SHIPPING OVER $49
+    const subtotal = line_items.reduce(
+      (t, it) => t + (Number(it.base_price_money.amount) * Number(it.quantity)),
+      0
+    ) / 100;
 
-    if (taxPctStr && !Number.isNaN(Number(taxPctStr))) {
-      order.taxes = [
-        {
-          uid: 'order_tax',
-          name: 'Tax',
-          percentage: taxPctStr,
-          scope: 'ORDER',
-          type: 'ADDITIVE',
-        },
-      ];
-    }
+    const shippingCost = subtotal >= 49 ? 0 : (shipping ?? 3.99); // Default $8 if none given
 
-    // ✅ Shipping at order level — does NOT count as item
-    if (shipping && cents(shipping) > 0) {
+    if (shippingCost > 0) {
       order.service_charges = [
         {
           uid: 'shipping_charge',
           name: 'Shipping',
-          amount_money: { amount: cents(shipping), currency: 'USD' },
+          amount_money: { amount: cents(shippingCost), currency: 'USD' },
           calculation_phase: 'TOTAL_PHASE',
           taxable: false,
         },
       ];
     }
 
-    // ✅ Tell Square this order will ship (this allows shipping address field)
+    // ✅ Shipping address field stays enabled
     order.fulfillments = [
       {
         uid: 'SHIP',
@@ -112,14 +103,10 @@ export async function POST(req: Request) {
       idempotency_key: crypto.randomUUID(),
       order,
       checkout_options: {
-        ask_for_shipping_address: true, // ✅ Required in US e-commerce
+        ask_for_shipping_address: true,
+        redirect_url: redirectUrl,
       },
     };
-
-    // Optional customer redirect after payment success
-    if (redirectUrl) {
-      payload.checkout_options.redirect_url = redirectUrl;
-    }
 
     const resp = await fetch(
       'https://connect.squareup.com/v2/online-checkout/payment-links',
@@ -142,7 +129,7 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json(data, { status: 200 }); // ✅ success
+    return NextResponse.json(data, { status: 200 }); 
   } catch (error: any) {
     return NextResponse.json(
       { error: error?.message ?? 'Unexpected server error' },

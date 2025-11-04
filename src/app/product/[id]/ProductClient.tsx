@@ -12,6 +12,9 @@ import { useCart } from '../../components/CartContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { fbq } from "../../../lib/fbq";
+import { useEffect } from "react";
+
 
 import {
   Star,
@@ -75,6 +78,15 @@ interface Props {
 
 /* ---------- Component ---------- */
 export default function ProductClient({ product, relatedProducts }: Props) {
+  useEffect(() => {
+    fbq("track", "ViewContent", {
+      content_ids: [product._id],
+      content_name: product.name,
+      value: product.price,
+      currency: "USD",
+    });
+  }, [product]);
+  
   const router = useRouter();
   const { addToCart, cartQuantity } = useCart();
 
@@ -119,6 +131,13 @@ export default function ProductClient({ product, relatedProducts }: Props) {
   }, [product, selectedSize, selectedColor, quantity, firstImageUrl]);
 
   const handleAddToCart = useCallback(async () => {
+    fbq("track", "AddToCart", {
+      content_ids: [product._id],
+      content_name: product.name,
+      value: product.price,
+      currency: "USD",
+    });
+    
     if (!isSelectionComplete || product.outOfStock) return; // Add outOfStock check
     setIsAddingToCart(true);
     try {
