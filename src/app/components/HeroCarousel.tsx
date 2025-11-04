@@ -65,7 +65,7 @@ const NavigationButton = memo(({
 NavigationButton.displayName = "NavigationButton";
 
 /* Main Carousel */
-function NicheExclusivesCarousel() {
+function SimpleProductCarousel() {
   const { isDarkMode, isThemeLoaded } = useTheme();
   const [products, setProducts] = useState<CarouselProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -174,7 +174,7 @@ function NicheExclusivesCarousel() {
   const themeBorderColor = isDarkMode ? '#a90068' : '#3b82f6';
 
   return (
-    <section className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
+    <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden -mt-32 sm:-mt-40 md:-mt-20 lg:-mt-16 xl:-mt-12 py-4 sm:py-6 md:py-8 lg:py-10 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
       {/* Background */}
       <div className="absolute inset-0 -z-30 h-[120%] sm:h-[115%] md:h-[112%] lg:h-[110%] -top-[10%] sm:-top-[7.5%] md:-top-[6%] lg:-top-[5%]">
         <Image
@@ -191,18 +191,6 @@ function NicheExclusivesCarousel() {
 
       {/* Overlay */}
       <div className="absolute inset-0 -z-20 bg-black/20" />
-
-      {/* Section Title */}
-      <div className="mb-6 sm:mb-8 md:mb-10 lg:mb-12">
-        <h2 
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center tracking-tight"
-          style={{
-            textShadow: '0 4px 20px rgba(0,0,0,0.5)'
-          }}
-        >
-          Niche Exclusives
-        </h2>
-      </div>
 
       {/* Carousel Container */}
       <div 
@@ -262,10 +250,10 @@ function NicheExclusivesCarousel() {
                   >
                     <Link
                       href={`/product/${product.slug.current}`}
-                      className="relative w-full h-full group flex items-center justify-center"
+                      className="relative w-full h-full group flex flex-col items-center justify-center"
                     >
                       {/* Image Container */}
-                      <div className="relative w-full h-full">
+                      <div className="relative w-full h-[75%] mb-4">
                         {imageUrl ? (
                           <Image
                             src={imageUrl}
@@ -304,6 +292,36 @@ function NicheExclusivesCarousel() {
                           </div>
                         )}
                       </div>
+
+                      {/* Product Info */}
+                      <div className="w-full max-w-xs sm:max-w-sm px-2">
+                        <div 
+                          className="border-2 bg-white/10 backdrop-blur-md p-2.5 sm:p-3 md:p-3.5 text-center transition-all duration-300 group-hover:bg-white/20 rounded-lg shadow-xl"
+                          style={{
+                            borderColor: themeBorderColor,
+                            transition: 'border-color 0.3s ease'
+                          }}
+                        >
+                          <h3 
+                            className="text-sm sm:text-base md:text-lg font-medium mb-1 truncate"
+                            style={{ color: '#ffffff' }}
+                          >
+                            {product.name}
+                          </h3>
+                          <p 
+                            className="text-base sm:text-lg md:text-xl font-bold mb-1"
+                            style={{ color: '#ffffff' }}
+                          >
+                            ${product.price.toFixed(2)}
+                          </p>
+                          <div 
+                            className="text-xs sm:text-sm transition-colors"
+                            style={{ color: 'rgba(255, 255, 255, 0.9)' }}
+                          >
+                            View Product →
+                          </div>
+                        </div>
+                      </div>
                     </Link>
                   </div>
                 );
@@ -331,4 +349,4 @@ function NicheExclusivesCarousel() {
   );
 }
 
-export default memo(NicheExclusivesCarousel);
+export default memo(SimpleProductCarousel);
