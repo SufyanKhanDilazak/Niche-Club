@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import { toast } from "sonner"
 import type { CartItem } from "./Interface"
 
 interface CartContextType {
@@ -10,7 +11,6 @@ interface CartContextType {
   cartQuantity: number
   shouldGlow: boolean
   clearCart: () => void
-  // Add the missing properties
   subtotal: number
   tax: number
   shipping: number
@@ -24,6 +24,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [shouldGlow, setShouldGlow] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
 
+  // Load cart from localStorage on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedCart = localStorage.getItem("cartItems")
@@ -34,6 +35,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // Save cart to localStorage whenever it changes
   useEffect(() => {
     if (isInitialized && typeof window !== "undefined") {
       localStorage.setItem("cartItems", JSON.stringify(cartItems))
@@ -48,8 +50,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const tax = subtotal * 0.08
   const total = subtotal + shipping + tax
 
+  /**
+   * ✅ SECURITY CHECK: Prevent out-of-stock items from being added
+   * This is a backup validation in case someone tries to:
+   * - Manipulate the browser console
+   * - Bypass the disabled button in ProductClient
+   * - Use browser dev tools to force add items
+   */
   const addToCart = (product: CartItem) => {
+    // 🛡️ VALIDATION: Check if product is out of stock
+    if (product.outOfStock) {
+      console.warn('⚠️ Blocked attempt to add out-of-stock item:', product.name);
+      toast.error('This item is currently out of stock and cannot be added to cart');
+      return; // Stop execution - don't add to cart
+    }
+
+    // ✅ Product is in stock - proceed with adding to cart
     setCartItems((prevItems) => {
+      // Check if this exact item (same ID, size, color) already exists in cart
       const existingItem = prevItems.find(
         (item) =>
           item._id === product._id &&
@@ -57,6 +75,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           item.selectedColor === product.selectedColor,
       )
 
+      // If item exists, increase its quantity
       if (existingItem) {
         return prevItems.map((item) =>
           item._id === product._id &&
@@ -66,8 +85,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
             : item,
         )
       }
+      
+      // If item doesn't exist, add it as a new entry
       return [...prevItems, { ...product }]
     })
+    
+    // Trigger the cart icon glow animation
     setShouldGlow(true)
     setTimeout(() => setShouldGlow(false), 500)
   }
@@ -77,6 +100,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const itemToUpdate = prevItems.find(
         (item) => item._id === productId && item.selectedSize === selectedSize && item.selectedColor === selectedColor,
       )
+      
+      // If quantity > 1, just decrease by 1
       if (itemToUpdate && itemToUpdate.quantity > 1) {
         return prevItems.map((item) =>
           item._id === productId && item.selectedSize === selectedSize && item.selectedColor === selectedColor
@@ -84,6 +109,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
             : item,
         )
       }
+      
+      // If quantity = 1, remove item completely
       return prevItems.filter(
         (item) =>
           !(item._id === productId && item.selectedSize === selectedSize && item.selectedColor === selectedColor),

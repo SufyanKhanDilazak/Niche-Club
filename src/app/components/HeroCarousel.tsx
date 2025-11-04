@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { client } from "@/sanity/lib/client";
 import imageUrlBuilder from "@sanity/image-url";
+import { useTheme } from "./theme-context";
 
 /* Types */
 interface ProductImage {
@@ -34,10 +35,12 @@ const SLIDE_INTERVAL = 5000;
 /* Navigation Button */
 const NavigationButton = memo(({ 
   direction, 
-  onClick 
+  onClick,
+  isDarkMode
 }: { 
   direction: "left" | "right"; 
   onClick: () => void;
+  isDarkMode: boolean;
 }) => {
   const isLeft = direction === "left";
   const Icon = isLeft ? ChevronLeft : ChevronRight;
@@ -47,7 +50,11 @@ const NavigationButton = memo(({
       variant="ghost"
       size="icon"
       aria-label={`${isLeft ? "Previous" : "Next"} slide`}
-      className={`absolute ${isLeft ? "left-2 sm:left-4 md:left-6 lg:left-8" : "right-2 sm:right-4 md:right-6 lg:right-8"} top-1/2 -translate-y-1/2 z-40 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-black/70 backdrop-blur-md text-white hover:bg-black/85 active:scale-95 transition-all duration-300 hover:scale-110 shadow-2xl border-2 border-white/60`}
+      className={`absolute ${isLeft ? "left-2 sm:left-4 md:left-6 lg:left-8" : "right-2 sm:right-4 md:right-6 lg:right-8"} top-1/2 -translate-y-1/2 z-40 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-black/70 backdrop-blur-md text-white hover:bg-black/85 active:scale-95 transition-all duration-300 hover:scale-110 shadow-2xl`}
+      style={{
+        borderWidth: '2px',
+        borderColor: isDarkMode ? '#a90068' : '#3b82f6'
+      }}
       onClick={onClick}
     >
       <Icon className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8" />
@@ -58,7 +65,8 @@ const NavigationButton = memo(({
 NavigationButton.displayName = "NavigationButton";
 
 /* Main Carousel */
-function HeroCarousel() {
+function NicheExclusivesCarousel() {
+  const { isDarkMode, isThemeLoaded } = useTheme();
   const [products, setProducts] = useState<CarouselProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -161,10 +169,12 @@ function HeroCarousel() {
     return () => stopAutoSlide();
   }, [isClient, startAutoSlide, stopAutoSlide, products.length]);
 
-  if (!isClient) return null;
+  if (!isClient || !isThemeLoaded) return null;
+
+  const themeBorderColor = isDarkMode ? '#a90068' : '#3b82f6';
 
   return (
-    <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
+    <section className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
       {/* Background */}
       <div className="absolute inset-0 -z-30 h-[120%] sm:h-[115%] md:h-[112%] lg:h-[110%] -top-[10%] sm:-top-[7.5%] md:-top-[6%] lg:-top-[5%]">
         <Image
@@ -182,6 +192,18 @@ function HeroCarousel() {
       {/* Overlay */}
       <div className="absolute inset-0 -z-20 bg-black/20" />
 
+      {/* Section Title */}
+      <div className="mb-6 sm:mb-8 md:mb-10 lg:mb-12">
+        <h2 
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center tracking-tight"
+          style={{
+            textShadow: '0 4px 20px rgba(0,0,0,0.5)'
+          }}
+        >
+          Niche Exclusives
+        </h2>
+      </div>
+
       {/* Carousel Container */}
       <div 
         className="relative w-full max-w-[90vw] sm:max-w-[86vw] md:max-w-[82vw] lg:max-w-[78vw] xl:max-w-[74vw] 2xl:max-w-[1600px] h-[58vh] sm:h-[65vh] md:h-[70vh] lg:h-[75vh] xl:h-[78vh] 2xl:h-[80vh] max-h-[900px]"
@@ -198,11 +220,23 @@ function HeroCarousel() {
         }}
       >
         {/* Glass Container */}
-        <div className="relative w-full h-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-[2px] border border-white/20">
+        <div 
+          className="relative w-full h-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-[2px]"
+          style={{
+            borderWidth: '2px',
+            borderColor: themeBorderColor,
+            transition: 'border-color 0.3s ease'
+          }}
+        >
           {/* Slides */}
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-white border-t-transparent" />
+              <div 
+                className="h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"
+                style={{
+                  borderColor: `${themeBorderColor} transparent transparent transparent`
+                }}
+              />
             </div>
           ) : products.length > 0 ? (
             <div 
@@ -212,7 +246,6 @@ function HeroCarousel() {
               {products.map((product, idx) => {
                 const firstImage = product.images?.[0];
 
-                // ✅ Keep original aspect ratio – no forced square height
                 const imageUrl = firstImage?.asset
                   ? builder
                       .image(firstImage.asset)
@@ -229,10 +262,10 @@ function HeroCarousel() {
                   >
                     <Link
                       href={`/product/${product.slug.current}`}
-                      className="relative w-full h-full group flex flex-col items-center justify-center"
+                      className="relative w-full h-full group flex items-center justify-center"
                     >
-                      {/* ✅ Image box like your perfect version (no crop) */}
-                      <div className="relative w-full h-[75%] mb-4">
+                      {/* Image Container */}
+                      <div className="relative w-full h-full">
                         {imageUrl ? (
                           <Image
                             src={imageUrl}
@@ -271,21 +304,6 @@ function HeroCarousel() {
                           </div>
                         )}
                       </div>
-
-                      {/* Info - unchanged */}
-                      <div className="w-full max-w-xs sm:max-w-sm px-2">
-                        <div className="border-2 border-white/40 bg-white/10 backdrop-blur-md p-2.5 sm:p-3 md:p-3.5 text-center transition-all duration-300 group-hover:border-white/60 group-hover:bg-white/20 rounded-lg shadow-xl">
-                          <h3 className="text-sm sm:text-base md:text-lg text-white font-medium mb-1 truncate">
-                            {product.name}
-                          </h3>
-                          <p className="text-base sm:text-lg md:text-xl text-white font-bold mb-1">
-                            ${product.price.toFixed(2)}
-                          </p>
-                          <div className="text-xs sm:text-sm text-white/90 group-hover:text-white transition-colors">
-                            View Product →
-                          </div>
-                        </div>
-                      </div>
                     </Link>
                   </div>
                 );
@@ -304,8 +322,8 @@ function HeroCarousel() {
         {/* Navigation Arrows */}
         {!isLoading && products.length > 1 && (
           <>
-            <NavigationButton direction="left" onClick={goToPrev} />
-            <NavigationButton direction="right" onClick={goToNext} />
+            <NavigationButton direction="left" onClick={goToPrev} isDarkMode={isDarkMode} />
+            <NavigationButton direction="right" onClick={goToNext} isDarkMode={isDarkMode} />
           </>
         )}
       </div>
@@ -313,4 +331,4 @@ function HeroCarousel() {
   );
 }
 
-export default memo(HeroCarousel);
+export default memo(NicheExclusivesCarousel);

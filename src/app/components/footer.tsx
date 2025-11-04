@@ -12,7 +12,6 @@ const WhatsAppIcon = ({ size = 16 }: { size?: number }) => (
 
 export default function Footer() {
   return (
-    // change: mt-16 -> mt-auto and add safe-area bottom padding
     <footer className="bg-black text-white px-4 py-8 mt-auto pb-[max(2rem,env(safe-area-inset-bottom))]">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
 
@@ -31,26 +30,29 @@ export default function Footer() {
             <Link
               href="https://www.instagram.com/nicheclub.us"
               target="_blank"
-              className="flex items-center gap-2 text-blue-400 hover:text-blue-300"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
             >
               <Instagram size={16} />
               Instagram
             </Link>
             <Link
-              href="#"
+              href="https://www.facebook.com/share/1Fj3kzvoEx/?mibextid=wwXIfr"
               target="_blank"
-              className="flex items-center gap-2 text-blue-400 hover:text-blue-300"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
             >
               <Facebook size={16} />
               Facebook
             </Link>
             <Link
-              href="https://wa.me/+1934-799-1588"
+              href="https://wa.me/19347991588"
               target="_blank"
-              className="flex items-center gap-2 text-blue-400 hover:text-blue-300"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
             >
               <WhatsAppIcon />
-              +1 934-799-1588
+              WhatsApp
             </Link>
           </div>
         </div>
@@ -59,11 +61,17 @@ export default function Footer() {
         <div className="space-y-4 text-center md:text-left">
           <h4 className="text-xl font-bold">SUPPORT</h4>
           <div className="space-y-2 flex flex-col items-center md:items-start">
-            <Link href="tel:+1934-799-1588" className="flex items-center gap-2 text-blue-400 hover:text-blue-300">
+            <Link 
+              href="tel:+19347991588" 
+              className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
+            >
               <Phone size={16} />
               +1 934-799-1588
             </Link>
-            <Link href="mailto:contact@nicheclub.us" className="flex items-center gap-2 text-blue-400 hover:text-blue-300">
+            <Link 
+              href="mailto:contact@nicheclub.us" 
+              className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
+            >
               <Mail size={16} />
               contact@nicheclub.us
             </Link>
@@ -71,13 +79,13 @@ export default function Footer() {
 
           <h4 className="text-xl font-bold pt-4">POLICIES</h4>
           <div className="space-y-2 flex flex-col items-center md:items-start">
-            <Link href="/privacypolicy" className="block text-blue-400 hover:text-blue-300">
+            <Link href="/privacypolicy" className="block text-blue-400 hover:text-blue-300 transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/cookiepolicy" className="block text-blue-400 hover:text-blue-300">
+            <Link href="/cookiepolicy" className="block text-blue-400 hover:text-blue-300 transition-colors">
               Cookie Policy
             </Link>
-            <Link href="/returnexchange" className="block text-blue-400 hover:text-blue-300">
+            <Link href="/returnexchange" className="block text-blue-400 hover:text-blue-300 transition-colors">
               Return & Exchange
             </Link>
           </div>

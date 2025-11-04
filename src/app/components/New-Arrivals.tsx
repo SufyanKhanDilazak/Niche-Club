@@ -64,24 +64,53 @@ const CategoryBanner = memo(function CategoryBanner({
   return (
     <div className={`category-banner-container ${className}`}>
       <div className="category-banner">
-        <Image
-          src="/newarrivals.png"
-          alt="New Arrivals Banner"
-          fill
-          className="banner-image"
-          style={{ objectFit: 'cover' }}
-          priority
-        />
+        <div className="image-wrapper">
+          <Image
+            src="/newarrivals.png"
+            alt="New Arrivals Banner"
+            fill
+            style={{ objectFit: 'cover', objectPosition: 'center' }}
+            priority
+          />
+        </div>
       </div>
 
       <style jsx>{`
-        .category-banner-container { width:100%; position:relative; overflow:hidden; border-radius:16px; margin:0 auto 1.5rem; }
-        .category-banner { position:relative; height:200px; background:transparent; overflow:hidden; border:1px solid rgba(255,255,255,.1); }
-        @media (max-width:768px){ .category-banner{ height:140px } }
-        @media (max-width:480px){ .category-banner{ height:120px } }
-      `}</style>
-      <style jsx global>{`
-        .banner-image { border-radius:16px; }
+        .category-banner-container { 
+          width:100%; 
+          position:relative; 
+          overflow:hidden; 
+          border-radius:16px; 
+          margin:0 auto 1.5rem; 
+        }
+        .category-banner { 
+          position:relative; 
+          height:200px; 
+          background:transparent; 
+          overflow:hidden; 
+          border:1px solid rgba(255,255,255,.1); 
+          border-radius:16px;
+        }
+        
+        .image-wrapper {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          transform: scale(1);
+          transition: transform 0.3s ease;
+        }
+        
+        /* Tablet */
+        @media (max-width:768px) { 
+          .category-banner { height:140px; }
+          .image-wrapper { transform: scale(1.5); }
+        }
+        
+        /* Mobile */
+        @media (max-width:480px) { 
+          .category-banner { height:120px; }
+          .image-wrapper { transform: scale(2); }
+        }
       `}</style>
     </div>
   );

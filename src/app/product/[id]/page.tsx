@@ -27,6 +27,7 @@ interface Product {
   sizes?: string[];
   colors?: string[];
   categories?: Category[];
+  outOfStock: boolean;
 }
 interface RelatedProduct {
   _id: string;
@@ -36,12 +37,13 @@ interface RelatedProduct {
   images: ProductImage[];
   onSale: boolean;
   newArrival: boolean;
+  outOfStock: boolean;
 }
 
 /* ---------- GROQ Queries ---------- */
-const PRODUCT_QUERY = `*[_type=="product" && (_id==$id || slug.current==$id)][0]{_id,name,"slug":slug,price,"images":images[]{_key,asset,alt},description,onSale,newArrival,sizes,colors,"categories":categories[]->{_id,title,"slug":slug}}`;
+const PRODUCT_QUERY = `*[_type=="product" && (_id==$id || slug.current==$id)][0]{_id,name,"slug":slug,price,"images":images[]{_key,asset,alt},description,onSale,newArrival,outOfStock,sizes,colors,"categories":categories[]->{_id,title,"slug":slug}}`;
 
-const RELATED_PRODUCTS_QUERY = `*[_type=="product" && _id!=$id && count(categories[@._ref in $categoryRefs])>0][0...4]{_id,name,"slug":slug,price,"images":images[0...2]{_key,asset,alt},onSale,newArrival}`;
+const RELATED_PRODUCTS_QUERY = `*[_type=="product" && _id!=$id && count(categories[@._ref in $categoryRefs])>0][0...4]{_id,name,"slug":slug,price,"images":images[0...2]{_key,asset,alt},onSale,newArrival,outOfStock}`;
 
 const STATIC_PARAMS_QUERY = `*[_type=="product" && defined(slug.current)]{_id,"slug":slug.current}`;
 

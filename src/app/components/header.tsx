@@ -311,7 +311,7 @@ export function Header() {
 
              <div className="flex items-center gap-2">
   <div className="scale-[0.65] lg:scale-75">
-    <BB8ThemeToggle size={9} />
+    <BB8ThemeToggle size={8} />
   </div>
 
   <Sheet open={isCartSheetOpen} onOpenChange={setIsCartSheetOpen}>

@@ -55,6 +55,8 @@ interface Product {
   sizes?: string[];
   colors?: string[];
   categories?: Category[];
+  outOfStock: boolean
+
 }
 interface RelatedProduct {
   _id: string;
@@ -64,6 +66,7 @@ interface RelatedProduct {
   images: ProductImage[];
   onSale: boolean;
   newArrival: boolean;
+  outOfStock: boolean
 }
 interface Props {
   product: Product;
@@ -95,7 +98,9 @@ export default function ProductClient({ product, relatedProducts }: Props) {
   const isSizeRequired = !!(product.sizes?.length);
   const isColorRequired = !!(product.colors?.length);
   const isSelectionComplete =
-    (!isSizeRequired || !!selectedSize) && (!isColorRequired || !!selectedColor);
+  !product.outOfStock && // Add this check
+  (!isSizeRequired || !!selectedSize) && 
+  (!isColorRequired || !!selectedColor);
 
   /* ---------- Cart: Add ---------- */
   const buildCartItem = useCallback((): CartItem => {
@@ -114,7 +119,7 @@ export default function ProductClient({ product, relatedProducts }: Props) {
   }, [product, selectedSize, selectedColor, quantity, firstImageUrl]);
 
   const handleAddToCart = useCallback(async () => {
-    if (!isSelectionComplete) return;
+    if (!isSelectionComplete || product.outOfStock) return; // Add outOfStock check
     setIsAddingToCart(true);
     try {
       addToCart(buildCartItem());
@@ -129,8 +134,8 @@ export default function ProductClient({ product, relatedProducts }: Props) {
 
   /* ---------- Buy Now → View Cart (no Square here) ---------- */
   const handleBuyNow = useCallback(() => {
-    if (!isSelectionComplete) {
-      toast.error('Please select required options');
+    if (!isSelectionComplete || product.outOfStock) { // Add outOfStock check
+      toast.error(product.outOfStock ? 'Product is out of stock' : 'Please select required options');
       return;
     }
     try {
@@ -222,20 +227,25 @@ export default function ProductClient({ product, relatedProducts }: Props) {
                 </div>
               )}
 
-              {/* Flags */}
-              <div className="absolute left-4 top-4 flex flex-col gap-2">
-                {product.newArrival && (
-                  <Badge className="border-0 bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg">
-                    <Zap className="mr-1 h-3 w-3" />
-                    New
-                  </Badge>
-                )}
-                {product.onSale && (
-                  <Badge className="border-0 bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg">
-                    Sale
-                  </Badge>
-                )}
-              </div>
+           {/* Flags */}
+<div className="absolute left-4 top-4 flex flex-col gap-2">
+  {product.outOfStock && (
+    <Badge className="border-0 bg-gradient-to-r from-gray-600 to-gray-800 text-white shadow-lg">
+      Out of Stock
+    </Badge>
+  )}
+  {product.newArrival && (
+    <Badge className="border-0 bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg">
+      <Zap className="mr-1 h-3 w-3" />
+      New
+    </Badge>
+  )}
+  {product.onSale && (
+    <Badge className="border-0 bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg">
+      Sale
+    </Badge>
+  )}
+</div>
 
               {/* Gallery controls */}
               {product.images.length > 1 && (
@@ -470,40 +480,51 @@ export default function ProductClient({ product, relatedProducts }: Props) {
               <h3 className="text-lg font-semibold text-white dark:text-white">Quantity</h3>
               <div className="flex items-center gap-4">
                 <div className="flex items-center overflow-hidden rounded-lg border-2 border-black/30 dark:border-white/30">
-                  <button
-                    onClick={() => adjustQuantity(-1)}
-                    className="px-3 py-2 text-white transition-colors hover:bg-black/10 dark:text-white dark:hover:bg-white/10"
-                    aria-label="Decrease quantity"
-                    disabled={quantity <= 1}
-                  >
+                <button
+  onClick={() => adjustQuantity(-1)}
+  className="px-3 py-2 text-white transition-colors hover:bg-black/10 dark:text-white dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+  aria-label="Decrease quantity"
+  disabled={quantity <= 1 || product.outOfStock} // Add outOfStock
+>
                     <Minus className="h-4 w-4" />
                   </button>
                   <span className="min-w-[3rem] border-x-2 border-black/30 px-4 py-2 text-center text-lg font-semibold text-white dark:border-white/30 dark:text-white">
                     {quantity}
                   </span>
                   <button
-                    onClick={() => adjustQuantity(1)}
-                    className="px-3 py-2 text-white transition-colors hover:bg-black/10 dark:text-white dark:hover:bg-white/10"
-                    aria-label="Increase quantity"
-                  >
+  onClick={() => adjustQuantity(1)}
+  className="px-3 py-2 text-white transition-colors hover:bg-black/10 dark:text-white dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+  aria-label="Increase quantity"
+  disabled={product.outOfStock} // Add outOfStock
+>
                     <Plus className="h-4 w-4" />
                   </button>
                 </div>
                 <div className="text-sm text-white dark:text-white">
-                  <span className="font-medium text-green-600 dark:text-green-400">✓ In Stock</span>
-                  <br />
-                  Ready to ship
-                </div>
+  {product.outOfStock ? (
+    <>
+      <span className="font-medium text-red-600 dark:text-red-400">✗ Out of Stock</span>
+      <br />
+      Currently unavailable
+    </>
+  ) : (
+    <>
+      <span className="font-medium text-green-600 dark:text-green-400">✓ In Stock</span>
+      <br />
+      Ready to ship
+    </>
+  )}
+</div>
               </div>
             </div>
 
             {/* Actions */}
             <div className="space-y-3">
-              <Button
-                onClick={handleAddToCart}
-                disabled={!isSelectionComplete || isAddingToCart}
-                className="w-full rounded-lg border-0 bg-blue-600 py-3 text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 hover:bg-blue-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#a90068] dark:hover:bg-[#8a0055]"
-              >
+            <Button
+  onClick={handleAddToCart}
+  disabled={!isSelectionComplete || isAddingToCart || product.outOfStock} // Add outOfStock
+  className="..."
+>
                 {isAddingToCart ? (
                   <span className="flex items-center gap-2">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -531,15 +552,15 @@ export default function ProductClient({ product, relatedProducts }: Props) {
 
               {/* Buy Now -> go to Cart (then proceed to checkout from there) */}
               <Button
-                onClick={handleBuyNow}
-                disabled={!isSelectionComplete}
-                className="w-full rounded-lg border-0 bg-gradient-to-r from-emerald-600 to-emerald-700 py-3 text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 hover:from-emerald-700 hover:to-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <span className="flex items-center gap-2">
-                  <Zap className="h-5 w-5" />
-                  Buy Now
-                </span>
-              </Button>
+  onClick={handleBuyNow}
+  disabled={!isSelectionComplete || product.outOfStock} // Add outOfStock
+  className="..."
+>
+  <span className="flex items-center gap-2">
+    <Zap className="h-5 w-5" />
+    {product.outOfStock ? 'Out of Stock' : 'Buy Now'}
+  </span>
+</Button>
             </div>
 
             {/* Why us */}
@@ -604,19 +625,24 @@ export default function ProductClient({ product, relatedProducts }: Props) {
                             <Eye className="h-6 w-6 text-white dark:text.White" />
                           </div>
                         )}
-
-                        <div className="absolute left-2 top-2 flex flex-col gap-1">
-                          {rp.newArrival && (
-                            <span className="rounded-sm bg-gradient-to-r from-green-500 to-emerald-500 px-2 py-1 text-xs font-bold text-white shadow">
-                              NEW
-                            </span>
-                          )}
-                          {rp.onSale && (
-                            <span className="rounded-sm bg-gradient-to-r from-red-500 to-pink-500 px-2 py-1 text-xs font-bold text.White shadow">
-                              SALE
-                            </span>
-                          )}
-                        </div>
+<div className="absolute left-2 top-2 flex flex-col gap-1">
+  {rp.outOfStock && (
+    <span className="rounded-sm bg-gradient-to-r from-gray-600 to-gray-800 px-2 py-1 text-xs font-bold text-white shadow">
+      OUT OF STOCK
+    </span>
+  )}
+  {rp.newArrival && (
+    <span className="rounded-sm bg-gradient-to-r from-green-500 to-emerald-500 px-2 py-1 text-xs font-bold text-white shadow">
+      NEW
+    </span>
+  )}
+  {rp.onSale && (
+    <span className="rounded-sm bg-gradient-to-r from-red-500 to-pink-500 px-2 py-1 text-xs font-bold text-white shadow">
+      SALE
+    </span>
+  )}
+</div>
+                      
                       </div>
 
                       <div className="mt-3">
