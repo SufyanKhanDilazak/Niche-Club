@@ -13,7 +13,6 @@ import { CartProvider } from "./components/CartContext";
 import { ThemeProvider } from "./components/theme-context";
 import { HeadlineStrip } from "./components/Headline";
 import AuroraStarsBackground from "./components/AuroraStarsBackground";
-import HyperspeedLoaderOnce from "./components/HyperspeedLoaderOnce";
 
 const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
 
@@ -33,25 +32,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning data-hs-boot="1">
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
-        <Script id="hs-boot-skip" strategy="beforeInteractive">
-          {`try{
-            if(localStorage.getItem('seenHyperspeedLoader')==='true'){
-              const d=document.documentElement;
-              d.setAttribute('data-hs-skip','1');
-              d.removeAttribute('data-hs-boot');
-            }
-          }catch(e){}`}
-        </Script>
-
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.sanity.io" />
-
-        {/* Single 3D poster preload */}
-        <link rel="preload" as="image" href="/3d-poster.jpg" />
 
         <Script id="theme-bootstrap" strategy="beforeInteractive">
           {`try{
@@ -65,56 +51,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Script>
       </head>
 
-      {/* change: min-h-screen -> min-h-dvh */}
       <body className="min-h-dvh flex flex-col" style={{ backgroundColor: "var(--theme-bg)" }}>
-        <div
-          id="hs-boot"
-          style={{
-            position: "fixed", inset: 0, zIndex: 999999,
-            background: "#000", display: "grid", placeItems: "center",
-            opacity: 1, transition: "opacity .45s ease"
-          }}
-        >
-          <div className="hs-stage" />
-          <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", textAlign: "center" }}>
-            <div style={{
-              color: "#fff", fontWeight: 600, letterSpacing: ".02em",
-              fontSize: "clamp(1rem,2.6vw,1.6rem)", textShadow: "0 0 8px rgba(255,255,255,.53)"
-            }}>
-              Loading Your Niche...
-            </div>
-          </div>
-        </div>
-
-        <HyperspeedLoaderOnce />
-
         <ClerkProvider>
           <NextThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <ThemeProvider>
-              <AuroraStarsBackground>
-                <CartProvider>
-                  {/* change: min-h-screen -> min-h-0 flex-1 */}
-                  <div className="relative z-10 flex flex-col min-h-0 flex-1">
-                    <Header />
-                    <HeadlineStrip />
-                    <main className="flex-1">{children}</main>
-                    <Footer />
-                    <FooterTheme />
-                  </div>
-                </CartProvider>
-              </AuroraStarsBackground>
+              <CartProvider>
+                {/* Background video (iOS-safe, site-wide) */}
+                <AuroraStarsBackground
+                  src="https://res.cloudinary.com/dxtq1hdrz/video/upload/q_auto,f_auto/v1752020163/3d_ufmaf5"
+                  poster="/3d-poster.jpg"
+                />
+
+                {/* Foreground content */}
+                <div className="relative z-10 flex flex-col min-h-0 flex-1">
+                  <Header />
+                  <HeadlineStrip />
+                  <main className="flex-1">{children}</main>
+                  <Footer />
+                  <FooterTheme />
+                </div>
+              </CartProvider>
             </ThemeProvider>
           </NextThemeProvider>
         </ClerkProvider>
-
-        <Script id="hs-boot-clean" strategy="afterInteractive">
-          {`try{
-            const d=document.documentElement;
-            d.removeAttribute('data-hs-boot');
-            const b=document.getElementById('hs-boot');
-            if(b){b.classList.add('hide');setTimeout(()=>b.remove(),500);}
-          }catch(e){}`}
-        </Script>
       </body>
     </html>
   );
