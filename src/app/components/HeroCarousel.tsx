@@ -293,30 +293,38 @@ function SimpleProductCarousel() {
                         )}
                       </div>
 
-                      {/* Product Info */}
+                      {/* Product Info — SAFE BAR */}
                       <div className="w-full max-w-xs sm:max-w-sm px-2">
-                        <div 
-                          className="border-2 bg-white/10 backdrop-blur-md p-2.5 sm:p-3 md:p-3.5 text-center transition-all duration-300 group-hover:bg-white/20 rounded-lg shadow-xl"
+                        <div
+                          className={[
+                            // Solid fallback (always works)
+                            "border-2 rounded-lg shadow-xl p-2.5 sm:p-3 md:p-3.5 text-center",
+                            "bg-black/75",
+                            // Progressive enhancement (only on browsers that truly support backdrop-filter)
+                            "supports-[backdrop-filter:blur(6px)]:bg-black/50",
+                            "supports-[backdrop-filter:blur(6px)]:backdrop-blur-[6px]",
+                            // Interaction
+                            "transition-all duration-300 group-hover:bg-black/70",
+                          ].join(" ")}
                           style={{
                             borderColor: themeBorderColor,
-                            transition: 'border-color 0.3s ease'
+                            transition: "border-color 0.3s ease",
+                            // extra safety: ensure text remains on its own layer
+                            willChange: "transform"
                           }}
                         >
                           <h3 
-                            className="text-sm sm:text-base md:text-lg font-medium mb-1 truncate"
-                            style={{ color: '#ffffff' }}
+                            className="text-sm sm:text-base md:text-lg font-medium mb-1 truncate text-white"
                           >
                             {product.name}
                           </h3>
                           <p 
-                            className="text-base sm:text-lg md:text-xl font-bold mb-1"
-                            style={{ color: '#ffffff' }}
+                            className="text-base sm:text-lg md:text-xl font-bold mb-1 text-white"
                           >
                             ${product.price.toFixed(2)}
                           </p>
                           <div 
-                            className="text-xs sm:text-sm transition-colors"
-                            style={{ color: 'rgba(255, 255, 255, 0.9)' }}
+                            className="text-xs sm:text-sm text-white/90"
                           >
                             View Product →
                           </div>
