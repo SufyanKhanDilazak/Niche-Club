@@ -170,14 +170,6 @@ export function Header() {
                       {/* Header with close button */}
                       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-neutral-900">
                         <SheetTitle className="text-lg uppercase tracking-wide dark:text-white">MENU</SheetTitle>
-                        <SheetClose asChild>
-                          <button
-                            className="rounded-sm opacity-70 hover:opacity-100 transition-all hover:rotate-90 duration-200"
-                            aria-label="Close menu"
-                          >
-                            <X className="h-4 w-4 dark:text-white" />
-                          </button>
-                        </SheetClose>
                       </div>
 
                       {/* Navigation */}
