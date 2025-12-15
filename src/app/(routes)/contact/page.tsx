@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 import { Mail, Phone, Instagram, Facebook } from 'lucide-react';
 import { useTheme } from '../../components/theme-context';
 import { cn } from '@/lib/utils';
@@ -24,12 +25,20 @@ export default function Contact() {
   }, []);
 
   // Animation variants (matched with About page)
-  const fadeInUp = {
+  const fadeInUp: Variants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        // was: ease: 'easeOut'
+        ease: [0.16, 1, 0.3, 1],
+      },
+    },
   };
 
-  const staggerContainer = {
+  const staggerContainer: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -37,9 +46,18 @@ export default function Contact() {
     },
   };
 
-  const bounceIn = {
+  const bounceIn: Variants = {
     hidden: { opacity: 0, scale: 0.9 },
-    visible: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 100, damping: 12 } },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        // was: type: 'spring'
+        type: 'spring' as const,
+        stiffness: 100,
+        damping: 12,
+      },
+    },
   };
 
   // Color scheme adjustments (matched with About page)
@@ -245,7 +263,11 @@ export default function Contact() {
         className={`w-full max-w-5xl h-1 bg-gradient-to-r ${headerColor} opacity-30 rounded-full mx-auto`}
         initial={{ width: 0 }}
         animate={{ width: '100%' }}
-        transition={{ duration: 1.2, ease: 'easeInOut' }}
+        transition={{
+          duration: 1.2,
+          // was: ease: 'easeInOut'
+          ease: [0.42, 0, 0.58, 1],
+        }}
       />
     </div>
   );

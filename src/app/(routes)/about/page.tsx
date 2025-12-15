@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 import { Heart, Users, Sparkles, Award, Globe, Zap, ArrowRight } from 'lucide-react';
 import { useTheme } from '../../components/theme-context';
 import { cn } from '@/lib/utils';
@@ -44,7 +45,9 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ end, label, isPercent
       transition={{ duration: 0.5 }}
       whileHover={{ scale: 1.03 }}
     >
-      <div className={`text-3xl sm:text-4xl font-bold bg-gradient-to-r ${gradientColor} bg-clip-text text-transparent mb-2`}>
+      <div
+        className={`text-3xl sm:text-4xl font-bold bg-gradient-to-r ${gradientColor} bg-clip-text text-transparent mb-2`}
+      >
         {isPercentage ? `${count}%` : count.toLocaleString()}
       </div>
       <div className={`text-base sm:text-lg ${textColor} font-medium`}>{label}</div>
@@ -75,19 +78,20 @@ const AboutPage: React.FC = () => {
   }, []);
 
   // Animation variants
-  const fadeInUp = {
+  const fadeInUp: Variants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
         duration: 0.5,
-        ease: 'easeOut',
+        // was: ease: 'easeOut'
+        ease: [0.16, 1, 0.3, 1],
       },
     },
   };
 
-  const staggerContainer = {
+  const staggerContainer: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -194,12 +198,7 @@ const AboutPage: React.FC = () => {
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {stats.map((stat, index) => (
-              <AnimatedCounter
-                key={index}
-                end={stat.end}
-                label={stat.label}
-                isPercentage={stat.isPercentage}
-              />
+              <AnimatedCounter key={index} end={stat.end} label={stat.label} isPercentage={stat.isPercentage} />
             ))}
           </div>
         </div>
@@ -215,9 +214,7 @@ const AboutPage: React.FC = () => {
       >
         <div className="max-w-5xl mx-auto">
           <motion.div variants={fadeInUp} className="text-center mb-6">
-            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-bold ${textColor} mb-3`}>
-              Our Story
-            </h2>
+            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-bold ${textColor} mb-3`}>Our Story</h2>
             <div className={`h-1 w-16 bg-gradient-to-r ${buttonGradient} mx-auto`} />
           </motion.div>
           <motion.div
@@ -225,7 +222,8 @@ const AboutPage: React.FC = () => {
             className={`backdrop-blur-lg bg-white/5 dark:bg-gray-900/5 p-6 sm:p-8 border ${borderColor} rounded-2xl shadow-md`}
           >
             <p className={`text-lg sm:text-xl ${textColor} leading-relaxed font-medium`}>
-              Niche Club was founded to redefine fashion as a personal, powerful expression of individuality. We curate unique, high-quality pieces that empower you to tell your story through style.
+              Niche Club was founded to redefine fashion as a personal, powerful expression of individuality. We curate
+              unique, high-quality pieces that empower you to tell your story through style.
             </p>
           </motion.div>
         </div>
@@ -241,9 +239,7 @@ const AboutPage: React.FC = () => {
       >
         <div className="max-w-5xl mx-auto">
           <motion.div variants={fadeInUp} className="text-center mb-6">
-            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-bold ${textColor} mb-3`}>
-              Why Niche Club?
-            </h2>
+            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-bold ${textColor} mb-3`}>Why Niche Club?</h2>
             <div className={`h-1 w-16 bg-gradient-to-r ${buttonGradient} mx-auto`} />
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -254,10 +250,16 @@ const AboutPage: React.FC = () => {
                 className={`backdrop-blur-lg bg-white/5 dark:bg-gray-900/5 p-6 sm:p-8 border ${borderColor} rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 group`}
                 whileHover={{ y: -6 }}
               >
-                <div className={`p-2 bg-gradient-to-r ${buttonGradient} w-fit rounded-lg mb-3 group-hover:scale-105 transition-transform`}>
+                <div
+                  className={`p-2 bg-gradient-to-r ${buttonGradient} w-fit rounded-lg mb-3 group-hover:scale-105 transition-transform`}
+                >
                   <div className="text-white">{feature.icon}</div>
                 </div>
-                <h3 className={`text-lg sm:text-xl font-bold ${textColor} mb-2 group-hover:${accentColor} transition-colors`}>{feature.title}</h3>
+                <h3
+                  className={`text-lg sm:text-xl font-bold ${textColor} mb-2 group-hover:${accentColor} transition-colors`}
+                >
+                  {feature.title}
+                </h3>
                 <p className={`text-base sm:text-lg ${textColor} leading-relaxed font-medium`}>{feature.description}</p>
               </motion.div>
             ))}
@@ -274,7 +276,9 @@ const AboutPage: React.FC = () => {
         variants={fadeInUp}
       >
         <div className="max-w-5xl mx-auto text-center">
-          <div className={`backdrop-blur-lg bg-white/5 dark:bg-gray-900/5 p-6 sm:p-8 border ${borderColor} rounded-2xl shadow-md`}>
+          <div
+            className={`backdrop-blur-lg bg-white/5 dark:bg-gray-900/5 p-6 sm:p-8 border ${borderColor} rounded-2xl shadow-md`}
+          >
             <h2 className={`text-3xl sm:text-4xl md:text-5xl font-bold ${textColor} mb-3`}>Join the Movement</h2>
             <p className={`text-lg sm:text-xl ${textColor} mb-6 max-w-2xl mx-auto font-medium`}>
               Connect with a community of style enthusiasts and discover fashion that defines you.
