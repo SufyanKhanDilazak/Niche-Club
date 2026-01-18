@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, memo } from "react";
+import React, { useCallback, useEffect, useRef, useState, memo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { client } from "@/sanity/lib/client";
@@ -33,34 +33,40 @@ const BACKGROUND_IMAGE = "/models/2.png";
 const SLIDE_INTERVAL = 5000;
 
 /* Navigation Button */
-const NavigationButton = memo(({ 
-  direction, 
-  onClick,
-  isDarkMode
-}: { 
-  direction: "left" | "right"; 
-  onClick: () => void;
-  isDarkMode: boolean;
-}) => {
-  const isLeft = direction === "left";
-  const Icon = isLeft ? ChevronLeft : ChevronRight;
-  
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      aria-label={`${isLeft ? "Previous" : "Next"} slide`}
-      className={`absolute ${isLeft ? "left-2 sm:left-4 md:left-6 lg:left-8" : "right-2 sm:right-4 md:right-6 lg:right-8"} top-1/2 -translate-y-1/2 z-40 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-black/70 backdrop-blur-md text-white hover:bg-black/85 active:scale-95 transition-all duration-300 hover:scale-110 shadow-2xl`}
-      style={{
-        borderWidth: '2px',
-        borderColor: isDarkMode ? '#a90068' : '#3b82f6'
-      }}
-      onClick={onClick}
-    >
-      <Icon className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8" />
-    </Button>
-  );
-});
+const NavigationButton = memo(
+  ({
+    direction,
+    onClick,
+    isDarkMode,
+  }: {
+    direction: "left" | "right";
+    onClick: () => void;
+    isDarkMode: boolean;
+  }) => {
+    const isLeft = direction === "left";
+    const Icon = isLeft ? ChevronLeft : ChevronRight;
+
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label={`${isLeft ? "Previous" : "Next"} slide`}
+        className={`absolute ${
+          isLeft
+            ? "left-2 sm:left-4 md:left-6 lg:left-8"
+            : "right-2 sm:right-4 md:right-6 lg:right-8"
+        } top-1/2 -translate-y-1/2 z-40 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-black/70 backdrop-blur-md text-white hover:bg-black/85 active:scale-95 transition-all duration-300 hover:scale-110 shadow-2xl`}
+        style={{
+          borderWidth: "2px",
+          borderColor: isDarkMode ? "#a90068" : "#3b82f6",
+        }}
+        onClick={onClick}
+      >
+        <Icon className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8" />
+      </Button>
+    );
+  }
+);
 
 NavigationButton.displayName = "NavigationButton";
 
@@ -99,7 +105,7 @@ function SimpleProductCarousel() {
       const data = await client.fetch<CarouselProduct[]>(query);
       setProducts(data);
     } catch (err) {
-      console.error('Error:', err);
+      console.error("Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -117,9 +123,7 @@ function SimpleProductCarousel() {
 
   const goToPrev = useCallback(() => {
     if (products.length === 0) return;
-    setCurrentIndex((prev) => 
-      prev === 0 ? products.length - 1 : prev - 1
-    );
+    setCurrentIndex((prev) => (prev === 0 ? products.length - 1 : prev - 1));
   }, [products.length]);
 
   /* Touch Handlers */
@@ -133,17 +137,15 @@ function SimpleProductCarousel() {
   }, []);
 
   const onTouchEnd = useCallback(() => {
-    if (!touchStart || !touchEnd) return;
-    
+    // ✅ fix: allow swipe when start/end are 0 (edge case)
+    if (touchStart === null || touchEnd === null) return;
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 
-    if (isLeftSwipe) {
-      goToNext();
-    } else if (isRightSwipe) {
-      goToPrev();
-    }
+    if (isLeftSwipe) goToNext();
+    if (isRightSwipe) goToPrev();
   }, [touchStart, touchEnd, goToNext, goToPrev]);
 
   /* Auto-slide */
@@ -169,9 +171,24 @@ function SimpleProductCarousel() {
     return () => stopAutoSlide();
   }, [isClient, startAutoSlide, stopAutoSlide, products.length]);
 
+  // ✅ Keep index valid if products length changes (prevents “half slide” / odd offsets)
+  useEffect(() => {
+    if (products.length === 0) return;
+    setCurrentIndex((i) => Math.min(i, products.length - 1));
+  }, [products.length]);
+
   if (!isClient || !isThemeLoaded) return null;
 
-  const themeBorderColor = isDarkMode ? '#a90068' : '#3b82f6';
+  const themeBorderColor = isDarkMode ? "#a90068" : "#3b82f6";
+
+  // ✅ Most common cause of “2 products / half product showing” on mobile:
+  // iOS + vw rounding + transform on a flex track.
+  // Fix: make the track width explicit and make each slide width explicit (w-full).
+  const trackStyle: React.CSSProperties = {
+    width: `${products.length * 100}%`,
+    transform: `translate3d(-${currentIndex * (100 / Math.max(products.length, 1))}%, 0, 0)`,
+    willChange: "transform",
+  };
 
   return (
     <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden -mt-32 sm:-mt-40 md:-mt-20 lg:-mt-16 xl:-mt-12 py-4 sm:py-6 md:py-8 lg:py-10 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
@@ -193,7 +210,7 @@ function SimpleProductCarousel() {
       <div className="absolute inset-0 -z-20 bg-black/20" />
 
       {/* Carousel Container */}
-      <div 
+      <div
         className="relative w-full max-w-[90vw] sm:max-w-[86vw] md:max-w-[82vw] lg:max-w-[78vw] xl:max-w-[74vw] 2xl:max-w-[1600px] h-[58vh] sm:h-[65vh] md:h-[70vh] lg:h-[75vh] xl:h-[78vh] 2xl:h-[80vh] max-h-[900px]"
         onMouseEnter={stopAutoSlide}
         onMouseLeave={startAutoSlide}
@@ -208,28 +225,27 @@ function SimpleProductCarousel() {
         }}
       >
         {/* Glass Container */}
-        <div 
+        <div
           className="relative w-full h-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-[2px]"
           style={{
-            borderWidth: '2px',
-            borderColor: themeBorderColor,
-            transition: 'border-color 0.3s ease'
+            borderWidth: "2px",
+            transition: "border-color 0.3s ease",
           }}
         >
           {/* Slides */}
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
-              <div 
+              <div
                 className="h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"
                 style={{
-                  borderColor: `${themeBorderColor} transparent transparent transparent`
+                  borderColor: `${themeBorderColor} transparent transparent transparent`,
                 }}
               />
             </div>
           ) : products.length > 0 ? (
-            <div 
+            <div
               className="flex h-full transition-transform duration-700 ease-in-out"
-              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+              style={trackStyle}
             >
               {products.map((product, idx) => {
                 const firstImage = product.images?.[0];
@@ -244,15 +260,19 @@ function SimpleProductCarousel() {
                   : null;
 
                 return (
-                  <div 
+                  <div
                     key={product._id}
-                    className="relative min-w-full h-full flex-shrink-0 flex items-center justify-center p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8"
+                    // ✅ IMPORTANT: explicit width instead of min-w-full to avoid iOS rounding issues
+                    className="relative h-full flex-shrink-0 w-full flex items-center justify-center p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8"
+                    style={{
+                      width: `${100 / products.length}%`,
+                    }}
                   >
                     <Link
                       href={`/product/${product.slug.current}`}
                       className="relative w-full h-full group flex flex-col items-center justify-center"
                     >
-                      {/* Image Container */}
+                      {/* Image Container (UNCHANGED position/ratio) */}
                       <div className="relative w-full h-[75%] mb-4">
                         {imageUrl ? (
                           <Image
@@ -293,39 +313,29 @@ function SimpleProductCarousel() {
                         )}
                       </div>
 
-                      {/* Product Info — SAFE BAR */}
+                      {/* Product Info — SAFE BAR (UNCHANGED) */}
                       <div className="w-full max-w-xs sm:max-w-sm px-2">
                         <div
                           className={[
-                            // Solid fallback (always works)
                             "border-2 rounded-lg shadow-xl p-2.5 sm:p-3 md:p-3.5 text-center",
                             "bg-black/75",
-                            // Progressive enhancement (only on browsers that truly support backdrop-filter)
                             "supports-[backdrop-filter:blur(6px)]:bg-black/50",
                             "supports-[backdrop-filter:blur(6px)]:backdrop-blur-[6px]",
-                            // Interaction
                             "transition-all duration-300 group-hover:bg-black/70",
                           ].join(" ")}
                           style={{
                             borderColor: themeBorderColor,
                             transition: "border-color 0.3s ease",
-                            // extra safety: ensure text remains on its own layer
-                            willChange: "transform"
+                            willChange: "transform",
                           }}
                         >
-                          <h3 
-                            className="text-sm sm:text-base md:text-lg font-medium mb-1 truncate text-white"
-                          >
+                          <h3 className="text-sm sm:text-base md:text-lg font-medium mb-1 truncate text-white">
                             {product.name}
                           </h3>
-                          <p 
-                            className="text-base sm:text-lg md:text-xl font-bold mb-1 text-white"
-                          >
+                          <p className="text-base sm:text-lg md:text-xl font-bold mb-1 text-white">
                             ${product.price.toFixed(2)}
                           </p>
-                          <div 
-                            className="text-xs sm:text-sm text-white/90"
-                          >
+                          <div className="text-xs sm:text-sm text-white/90">
                             View Product →
                           </div>
                         </div>

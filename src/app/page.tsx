@@ -192,27 +192,7 @@ function Shell({
 /* ---------------- Editorial Intro ---------------- */
 function EditorialIntro() {
   return (
-    <div className="relative">
-      <div className="mx-auto max-w-[1100px] text-center">
-        <p className="text-[11px] sm:text-[12px] tracking-[0.34em] uppercase text-black/55 dark:text-white/55">
-          Niche Club — Premium Streetwear
-        </p>
-
-        {/* embedded “split pill” accents */}
-        <div className="mt-6 flex items-center justify-center gap-3 flex-wrap">
-          <span className="inline-flex items-center gap-2 rounded-full border border-black/10 dark:border-white/10 px-4 py-2 text-xs sm:text-sm text-black/70 dark:text-white/70">
-            <span className="h-2 w-2 rounded-full bg-[var(--accent-primary)]" />
-            New drops weekly
-          </span>
-          <span className="inline-flex items-center gap-2 rounded-full border border-black/10 dark:border-white/10 px-4 py-2 text-xs sm:text-sm text-black/70 dark:text-white/70">
-            <span className="h-2 w-2 rounded-full bg-[var(--accent-secondary)]" />
-            Clean silhouettes
-          </span>
-        </div>
-
-        <div className="mt-8 h-px w-[min(920px,92vw)] mx-auto bg-black/10 dark:bg-white/10" />
-      </div>
-    </div>
+   <div></div>
   );
 }
 
