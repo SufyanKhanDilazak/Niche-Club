@@ -88,7 +88,7 @@ const CategoryBanner = memo(function CategoryBanner({
           height:200px; 
           background:transparent; 
           overflow:hidden; 
-          border:1px solid rgba(255,255,255,.1); 
+          border: 1px solid rgba(0,0,0,.1);
           border-radius:16px;
         }
         
@@ -166,9 +166,10 @@ const ProductCard = memo(function ProductCard({ product, index }: { product: IPr
             unoptimized={true}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-white-400 text-sm font-light bg-transparent">
-            No Image
-          </div>
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm font-light bg-transparent">
+          No Image
+        </div>
+        
         )}
 
         {(product.newArrival || product.onSale || product.outOfStock) && (
@@ -182,8 +183,13 @@ const ProductCard = memo(function ProductCard({ product, index }: { product: IPr
 
       <div className="mt-2">
         <div className="border border-blue-500 dark:border-[#a90068] bg-transparent p-2 text-center transition-colors duration-200 group-hover:border-opacity-80">
-          <h4 className="text-sm md:text-base text-white dark:text-white truncate font-light mb-1">{product.name}</h4>
-          <p className="text-sm md:text-base text-white dark:text-white font-light">${product.price.toFixed(2)}</p>
+        <h4 className="text-sm md:text-base text-foreground truncate font-light mb-1">
+  {product.name}
+</h4>
+<p className="text-sm md:text-base text-foreground font-light">
+  ${product.price.toFixed(2)}
+</p>
+
         </div>
       </div>
     </Link>
@@ -284,7 +290,10 @@ const WomensCollection = memo(function WomensCollection() {
                 </div>
               ) : products.length === 0 ? (
                 <div className="col-span-full text-center py-6">
-                  <p className="text-white-500 dark:text-white-400 text-sm sm:text-base font-light">No products found</p>
+      <p className="text-muted-foreground text-sm sm:text-base font-light">
+  No products found
+</p>
+
                 </div>
               ) : (
                 grid

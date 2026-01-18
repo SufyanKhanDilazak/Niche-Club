@@ -120,14 +120,17 @@ const ProductCard = memo(({ product, index }: { product: IProduct; index: number
                 isHovered ? 'opacity-100' : 'opacity-0'
               }`}
             />
-            <div className="relative z-10">
-              <h4 className="text-sm sm:text-base font-light text-white dark:text-white truncate mb-2">
-                {product.name}
-              </h4>
+            <div className="relative z-10 text-black dark:text-white">
+
+            <h4 className="text-sm sm:text-base font-light text-black dark:text-white truncate mb-2">
+  {product.name}
+</h4>
+
               <div className="flex items-center justify-center gap-2">
-                <p className="text-sm sm:text-base font-medium text-white dark:text-white group-hover:scale-105 transition-transform">
-                  ${product.price.toFixed(2)}
-                </p>
+              <p className="text-sm sm:text-base font-medium text-black dark:text-white group-hover:scale-105 transition-transform">
+  ${product.price.toFixed(2)}
+</p>
+
                 {(product.onSale || product.newArrival || product.outOfStock) && (
                   <div className="w-1 h-1 bg-blue-500 dark:bg-[#a90068] rounded-full opacity-60" />
                 )}

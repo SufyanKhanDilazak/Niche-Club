@@ -33,7 +33,8 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ end, label, isPercent
     return () => clearInterval(timer);
   }, [end]);
 
-  const textColor = isDarkMode ? 'text-white' : 'text-white';
+  const textColor = isDarkMode ? 'text-white' : 'text-black';
+
   const gradientColor = isDarkMode ? 'from-[#a90068] to-[#a90068]' : 'from-blue-500 to-blue-600';
 
   return (
@@ -140,10 +141,12 @@ const AboutPage: React.FC = () => {
     { end: 98, label: 'Satisfaction Rate', isPercentage: true },
   ];
 
-  const textColor = isDarkMode ? 'text-white' : 'text-white';
+  const textColor = isDarkMode ? 'text-white' : 'text-black';
+
   const accentColor = isDarkMode ? 'text-[#a90068]' : 'text-blue-500';
   const buttonGradient = isDarkMode ? 'from-[#a90068] to-[#a90068]' : 'from-blue-500 to-blue-600';
-  const borderColor = isDarkMode ? 'border-gray-800/10' : 'border-white/10';
+  const borderColor = isDarkMode ? 'border-gray-800/10' : 'border-black/10';
+
 
   return (
     <div
@@ -256,7 +259,8 @@ const AboutPage: React.FC = () => {
                   <div className="text-white">{feature.icon}</div>
                 </div>
                 <h3
-                  className={`text-lg sm:text-xl font-bold ${textColor} mb-2 group-hover:${accentColor} transition-colors`}
+                  className={`text-lg sm:text-xl font-bold ${textColor} mb-2 group-hover:text-blue-500 dark:group-hover:text-[#a90068] transition-colors`}
+
                 >
                   {feature.title}
                 </h3>

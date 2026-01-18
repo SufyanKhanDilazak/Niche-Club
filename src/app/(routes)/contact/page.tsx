@@ -62,16 +62,20 @@ export default function Contact() {
 
   // Color scheme adjustments (matched with About page)
   const headerColor = isDarkMode ? 'from-[#a90068] to-[#a90068]' : 'from-blue-500 to-blue-600';
-  const textColor = isDarkMode ? 'text-white' : 'text-white';
+  const textColor = isDarkMode ? 'text-white' : 'text-black';
+
   const accentColor = isDarkMode ? 'text-[#a90068]' : 'text-blue-500';
   const accentHoverColor = isDarkMode ? 'hover:text-[#a90068]/80' : 'hover:text-blue-400';
   const buttonColor = isDarkMode ? 'from-[#a90068] to-[#a90068]' : 'from-blue-500 to-blue-600';
-  const buttonBorderColor = isDarkMode ? 'border-gray-800/10' : 'border-white/10';
+  const buttonBorderColor = isDarkMode ? 'border-gray-800/10' : 'border-black/10';
+
   const iconHighlight = isDarkMode
     ? 'drop-shadow-[0_0_6px_rgba(169,0,104,0.8)]'
     : 'drop-shadow-[0_0_6px_rgba(59,130,246,0.8)]';
-  const cardBg = isDarkMode ? 'bg-gray-900/5' : 'bg-white/5';
-  const cardBorder = isDarkMode ? 'border-gray-800/10' : 'border-white/10';
+    const cardBg = isDarkMode ? 'bg-gray-900/5' : 'bg-black/5';
+
+  const cardBorder = isDarkMode ? 'border-gray-800/10' : 'border-black/10';
+
 
   return (
     <div

@@ -51,6 +51,7 @@ const MENS_LINKS = [
   { name: 'ESSENTIALS', href: '/categories/men_essentials' },
   { name: 'TEES', href: '/categories/men_tees' },
   { name: 'DENIM', href: '/categories/men_denim' },
+  { name: 'Leather', href: '/categories/leather_collection' },
 ] as const;
 
 const WOMEN_LINKS = [
