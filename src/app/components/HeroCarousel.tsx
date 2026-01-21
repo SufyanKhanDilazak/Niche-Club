@@ -29,7 +29,6 @@ interface CarouselProduct {
 /* Image Builder */
 const builder = imageUrlBuilder(client);
 
-const BACKGROUND_IMAGE = "/models/2.png";
 const SLIDE_INTERVAL = 5000;
 
 /* Navigation Button */
@@ -37,11 +36,9 @@ const NavigationButton = memo(
   ({
     direction,
     onClick,
-    isDarkMode,
   }: {
     direction: "left" | "right";
     onClick: () => void;
-    isDarkMode: boolean;
   }) => {
     const isLeft = direction === "left";
     const Icon = isLeft ? ChevronLeft : ChevronRight;
@@ -55,10 +52,10 @@ const NavigationButton = memo(
           isLeft
             ? "left-2 sm:left-4 md:left-6 lg:left-8"
             : "right-2 sm:right-4 md:right-6 lg:right-8"
-        } top-1/2 -translate-y-1/2 z-40 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-black/70 backdrop-blur-md text-white hover:bg-black/85 active:scale-95 transition-all duration-300 hover:scale-110 shadow-2xl`}
+        } top-1/2 -translate-y-1/2 z-40 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 lg:h-16 lg:w-16 rounded-full bg-black/70 text-white hover:bg-black/85 active:scale-95 transition-all duration-300 hover:scale-110 shadow-2xl`}
         style={{
-          borderWidth: "2px",
-          borderColor: isDarkMode ? "#a90068" : "#3b82f6",
+          borderWidth: "1px",
+          borderColor: "var(--accent-pink)",
         }}
         onClick={onClick}
       >
@@ -77,11 +74,7 @@ function SimpleProductCarousel() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isClient, setIsClient] = useState(false);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const minSwipeDistance = 50;
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   /* Fetch Products */
   const fetchProducts = useCallback(async () => {
@@ -115,63 +108,44 @@ function SimpleProductCarousel() {
     fetchProducts();
   }, [fetchProducts]);
 
-  /* Navigation */
-  const goToNext = useCallback(() => {
-    if (products.length === 0) return;
-    setCurrentIndex((prev) => (prev + 1) % products.length);
-  }, [products.length]);
-
-  const goToPrev = useCallback(() => {
-    if (products.length === 0) return;
-    setCurrentIndex((prev) => (prev === 0 ? products.length - 1 : prev - 1));
-  }, [products.length]);
-
-  /* Touch Handlers */
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  }, []);
-
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  }, []);
-
-  const onTouchEnd = useCallback(() => {
-    // ✅ fix: allow swipe when start/end are 0 (edge case)
-    if (touchStart === null || touchEnd === null) return;
-
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe) goToNext();
-    if (isRightSwipe) goToPrev();
-  }, [touchStart, touchEnd, goToNext, goToPrev]);
-
-  /* Auto-slide */
-  const startAutoSlide = useCallback(() => {
-    if (products.length <= 1) return;
-    timerRef.current = setInterval(goToNext, SLIDE_INTERVAL);
-  }, [goToNext, products.length]);
-
-  const stopAutoSlide = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
-
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  useEffect(() => {
-    if (!isClient || products.length === 0) return;
-    startAutoSlide();
-    return () => stopAutoSlide();
-  }, [isClient, startAutoSlide, stopAutoSlide, products.length]);
+  /* Navigation */
+  const goToNext = useCallback(() => {
+    setCurrentIndex((i) => (products.length ? (i + 1) % products.length : 0));
+  }, [products.length]);
 
-  // ✅ Keep index valid if products length changes (prevents “half slide” / odd offsets)
+  const goToPrev = useCallback(() => {
+    setCurrentIndex((i) =>
+      products.length ? (i === 0 ? products.length - 1 : i - 1) : 0
+    );
+  }, [products.length]);
+
+  /* Auto-slide */
+  useEffect(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    if (!isClient) return;
+    if (products.length <= 1) return;
+
+    timerRef.current = setInterval(() => {
+      setCurrentIndex((i) => (i + 1) % products.length);
+    }, SLIDE_INTERVAL);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [isClient, products.length]);
+
+  /* Keep index valid */
   useEffect(() => {
     if (products.length === 0) return;
     setCurrentIndex((i) => Math.min(i, products.length - 1));
@@ -179,57 +153,58 @@ function SimpleProductCarousel() {
 
   if (!isClient || !isThemeLoaded) return null;
 
-  const themeBorderColor = isDarkMode ? "#a90068" : "#3b82f6";
-
-  // ✅ Most common cause of “2 products / half product showing” on mobile:
-  // iOS + vw rounding + transform on a flex track.
-  // Fix: make the track width explicit and make each slide width explicit (w-full).
   const trackStyle: React.CSSProperties = {
     width: `${products.length * 100}%`,
-    transform: `translate3d(-${currentIndex * (100 / Math.max(products.length, 1))}%, 0, 0)`,
+    transform: `translate3d(-${
+      currentIndex * (100 / Math.max(products.length, 1))
+    }%, 0, 0)`,
     willChange: "transform",
   };
 
   return (
-    <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden -mt-32 sm:-mt-40 md:-mt-20 lg:-mt-16 xl:-mt-12 py-4 sm:py-6 md:py-8 lg:py-10 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
-      {/* Background */}
-      <div className="absolute inset-0 -z-30 h-[120%] sm:h-[115%] md:h-[112%] lg:h-[110%] -top-[10%] sm:-top-[7.5%] md:-top-[6%] lg:-top-[5%]">
-        <Image
-          src={BACKGROUND_IMAGE}
-          alt="Background"
-          fill
-          priority
-          quality={100}
-          className="object-cover object-center"
-          sizes="100vw"
-          unoptimized={false}
-        />
-      </div>
+    <section className="relative w-full min-h-[65vh] sm:min-h-[75vh] md:min-h-[85vh] lg:min-h-screen flex items-center justify-center overflow-hidden py-6 sm:py-8 px-4">
+      {/* Base background */}
+      <div
+        className="absolute inset-0 -z-30"
+        style={{ backgroundColor: isDarkMode ? "#000000" : "#ffffff" }}
+      />
 
-      {/* Overlay */}
-      <div className="absolute inset-0 -z-20 bg-black/20" />
+      {/* Overlay (no blur) */}
+      <div
+        className="absolute inset-0 -z-20"
+        style={{
+          backgroundColor: isDarkMode
+            ? "rgba(0,0,0,0.85)"
+            : "rgba(255,255,255,0.15)",
+        }}
+      />
 
       {/* Carousel Container */}
       <div
-        className="relative w-full max-w-[90vw] sm:max-w-[86vw] md:max-w-[82vw] lg:max-w-[78vw] xl:max-w-[74vw] 2xl:max-w-[1600px] h-[58vh] sm:h-[65vh] md:h-[70vh] lg:h-[75vh] xl:h-[78vh] 2xl:h-[80vh] max-h-[900px]"
-        onMouseEnter={stopAutoSlide}
-        onMouseLeave={startAutoSlide}
-        onTouchStart={(e) => {
-          stopAutoSlide();
-          onTouchStart(e);
-        }}
-        onTouchMove={onTouchMove}
-        onTouchEnd={() => {
-          onTouchEnd();
-          startAutoSlide();
-        }}
+        className="relative w-full max-w-[90vw] sm:max-w-[86vw] md:max-w-[82vw] lg:max-w-[78vw] xl:max-w-[74vw] 2xl:max-w-[1600px]
+        h-[48vh] sm:h-[58vh] md:h-[68vh] lg:h-[74vh] xl:h-[76vh] 2xl:h-[78vh]
+        max-h-[880px]"
       >
-        {/* Glass Container */}
+        {/* Container (REMOVED backdrop blur) */}
         <div
-          className="relative w-full h-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-[2px]"
+          className="relative w-full h-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]"
           style={{
-            borderWidth: "2px",
-            transition: "border-color 0.3s ease",
+            backgroundImage: "none",
+            backgroundColor: isDarkMode ? "#000000" : "#ffffff",
+            border: "none",
+          }}
+          onMouseEnter={() => {
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
+              timerRef.current = null;
+            }
+          }}
+          onMouseLeave={() => {
+            if (products.length > 1 && !timerRef.current) {
+              timerRef.current = setInterval(() => {
+                setCurrentIndex((i) => (i + 1) % products.length);
+              }, SLIDE_INTERVAL);
+            }
           }}
         >
           {/* Slides */}
@@ -238,7 +213,7 @@ function SimpleProductCarousel() {
               <div
                 className="h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"
                 style={{
-                  borderColor: `${themeBorderColor} transparent transparent transparent`,
+                  borderColor: `var(--accent-pink) transparent transparent transparent`,
                 }}
               />
             </div>
@@ -249,31 +224,28 @@ function SimpleProductCarousel() {
             >
               {products.map((product, idx) => {
                 const firstImage = product.images?.[0];
-
-                const imageUrl = firstImage?.asset
-                  ? builder
-                      .image(firstImage.asset)
-                      .width(1200)
-                      .fit("max")
-                      .auto("format")
-                      .url()
-                  : null;
+                const imageUrl =
+                  firstImage?.asset
+                    ? builder
+                        .image(firstImage.asset)
+                        .width(1400)
+                        .fit("max")
+                        .auto("format")
+                        .url()
+                    : null;
 
                 return (
                   <div
                     key={product._id}
-                    // ✅ IMPORTANT: explicit width instead of min-w-full to avoid iOS rounding issues
                     className="relative h-full flex-shrink-0 w-full flex items-center justify-center p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8"
-                    style={{
-                      width: `${100 / products.length}%`,
-                    }}
+                    style={{ width: `${100 / products.length}%` }}
                   >
                     <Link
                       href={`/product/${product.slug.current}`}
                       className="relative w-full h-full group flex flex-col items-center justify-center"
                     >
-                      {/* Image Container (UNCHANGED position/ratio) */}
-                      <div className="relative w-full h-[75%] mb-4">
+                      {/* Image (unchanged settings) */}
+                      <div className="relative w-full h-[85%] sm:h-[88%] md:h-[90%] mb-2 sm:mb-3">
                         {imageUrl ? (
                           <Image
                             src={imageUrl}
@@ -286,58 +258,32 @@ function SimpleProductCarousel() {
                             unoptimized={true}
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-white/50 text-sm">
+                          <div className="flex h-full w-full items-center justify-center text-black/40 dark:text-white/50 text-sm">
                             No Image
-                          </div>
-                        )}
-
-                        {/* Badges */}
-                        {(product.newArrival || product.onSale || product.outOfStock) && (
-                          <div className="absolute top-2 left-2 flex flex-col gap-1">
-                            {product.newArrival && (
-                              <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-0.5 text-xs font-bold shadow-sm rounded-sm">
-                                NEW
-                              </span>
-                            )}
-                            {product.onSale && (
-                              <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-2 py-0.5 text-xs font-bold shadow-sm rounded-sm">
-                                SALE
-                              </span>
-                            )}
-                            {product.outOfStock && (
-                              <span className="bg-gradient-to-r from-gray-600 to-gray-800 text-white px-2 py-0.5 text-xs font-bold shadow-sm rounded-sm">
-                                OUT OF STOCK
-                              </span>
-                            )}
                           </div>
                         )}
                       </div>
 
-                      {/* Product Info — SAFE BAR (UNCHANGED) */}
-                      <div className="w-full max-w-xs sm:max-w-sm px-2">
+                      {/* Product Info (REMOVED supports/backdrop blur completely) */}
+                      <div className="w-full max-w-[280px] sm:max-w-sm px-2">
                         <div
                           className={[
-                            "border-2 rounded-lg shadow-xl p-2.5 sm:p-3 md:p-3.5 text-center",
+                            "border rounded-md shadow-xl text-center",
                             "bg-black/75",
-                            "supports-[backdrop-filter:blur(6px)]:bg-black/50",
-                            "supports-[backdrop-filter:blur(6px)]:backdrop-blur-[6px]",
                             "transition-all duration-300 group-hover:bg-black/70",
+                            "px-3 py-2 sm:px-3.5 sm:py-2.5",
                           ].join(" ")}
                           style={{
-                            borderColor: themeBorderColor,
-                            transition: "border-color 0.3s ease",
-                            willChange: "transform",
+                            borderColor: "var(--accent-pink)",
+                            borderWidth: "1px",
                           }}
                         >
-                          <h3 className="text-sm sm:text-base md:text-lg font-medium mb-1 truncate text-white">
+                          <h3 className="text-[13px] sm:text-base md:text-lg font-medium leading-tight truncate text-white">
                             {product.name}
                           </h3>
-                          <p className="text-base sm:text-lg md:text-xl font-bold mb-1 text-white">
+                          <p className="text-[15px] sm:text-lg md:text-xl font-bold leading-tight text-white">
                             ${product.price.toFixed(2)}
                           </p>
-                          <div className="text-xs sm:text-sm text-white/90">
-                            View Product →
-                          </div>
                         </div>
                       </div>
                     </Link>
@@ -347,21 +293,20 @@ function SimpleProductCarousel() {
             </div>
           ) : (
             <div className="flex h-full items-center justify-center">
-              <p className="text-white text-sm sm:text-base">No products found</p>
+              <p className="text-black/60 dark:text-white text-sm sm:text-base">
+                No products found
+              </p>
             </div>
           )}
 
-          {/* Inner glow */}
-          <div className="absolute inset-0 rounded-2xl sm:rounded-3xl shadow-[inset_0_0_40px_rgba(255,255,255,0.05)] pointer-events-none" />
+          {/* Navigation Arrows */}
+          {!isLoading && products.length > 1 && (
+            <>
+              <NavigationButton direction="left" onClick={goToPrev} />
+              <NavigationButton direction="right" onClick={goToNext} />
+            </>
+          )}
         </div>
-
-        {/* Navigation Arrows */}
-        {!isLoading && products.length > 1 && (
-          <>
-            <NavigationButton direction="left" onClick={goToPrev} isDarkMode={isDarkMode} />
-            <NavigationButton direction="right" onClick={goToNext} isDarkMode={isDarkMode} />
-          </>
-        )}
       </div>
     </section>
   );

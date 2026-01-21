@@ -1,24 +1,24 @@
 // app/page.tsx
 // ✅ Polished, immersive, edge-to-edge fashion homepage
-// ✅ REMOVED: extra gray overlay lines on banners / category images / product sections
-// ✅ REMOVED: side pink/blue corner ticks (no overflowing L-shapes)
-// ✅ UPDATED: each section container border = PINK in light, BLUE in dark (single clean border)
-// ✅ Keeps: neutral premium backdrop, full-bleed bands, responsive rail, nav untouched
+// ✅ Edge-to-edge accent borders without double bottom lines
+// ✅ Square edges, no blur filters, no overflow clipping (smooth on iPhone/low-end)
+// ✅ Keeps: premium backdrop, full-bleed bands, responsive rail, nav untouched
+// ✅ UPDATED: reduced top gap + tightened section spacing (no design change)
 
-import { Suspense } from 'react';
-import HeroCarousel from './components/HeroCarousel';
-import MensCollection from './components/Mens-Collection';
-import WomensCollection from './components/Women-Collection';
-import NewArrivals from './components/New-Arrivals';
-import TrendingProducts from './components/Trending-Products';
+import { Suspense } from "react";
+import HeroCarousel from "./components/HeroCarousel";
+import MensCollection from "./components/Mens-Collection";
+import WomensCollection from "./components/Women-Collection";
+import NewArrivals from "./components/New-Arrivals";
+import TrendingProducts from "./components/Trending-Products";
 
 /* ---------------- Skeletons ---------------- */
 function HeroSkeleton() {
   return (
-    <div className="relative w-full h-[56vh] sm:h-[64vh] overflow-hidden rounded-[22px] sm:rounded-[34px] bg-white dark:bg-black border border-black/10 dark:border-white/10 animate-pulse">
+    <div className="relative w-full h-[56vh] sm:h-[64vh] bg-white dark:bg-black border border-black/10 dark:border-white/10 animate-pulse">
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.04)_25%,rgba(0,0,0,0.08)_37%,rgba(0,0,0,0.04)_63%)] dark:bg-[linear-gradient(90deg,rgba(255,255,255,0.06)_25%,rgba(255,255,255,0.10)_37%,rgba(255,255,255,0.06)_63%)]" />
       <div className="absolute inset-0 grid place-items-center">
-        <div className="h-12 w-12 rounded-full border-[3px] border-[var(--accent-primary)] border-t-transparent animate-spin" />
+        <div className="h-12 w-12 border-[3px] border-[var(--accent-primary)] border-t-transparent animate-spin" />
       </div>
     </div>
   );
@@ -27,16 +27,16 @@ function HeroSkeleton() {
 function ProductsSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="h-7 w-64 mx-auto rounded-full bg-black/5 dark:bg-white/10 animate-pulse" />
+      <div className="h-7 w-64 mx-auto bg-black/5 dark:bg-white/10 animate-pulse" />
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-[18px] border border-black/10 dark:border-white/10 bg-white dark:bg-black shadow-[0_22px_80px_rgba(0,0,0,0.08)] dark:shadow-[0_22px_80px_rgba(0,0,0,0.86)] p-4 animate-pulse"
+            className="border border-black/10 dark:border-white/10 bg-white dark:bg-black p-4 animate-pulse"
           >
-            <div className="aspect-[4/5] rounded-[14px] bg-black/5 dark:bg-white/10 mb-4" />
-            <div className="h-4 rounded-full bg-black/5 dark:bg-white/10 mb-2" />
-            <div className="h-4 rounded-full bg-black/5 dark:bg-white/10 w-3/4" />
+            <div className="aspect-[4/5] bg-black/5 dark:bg-white/10 mb-4" />
+            <div className="h-4 bg-black/5 dark:bg-white/10 mb-2" />
+            <div className="h-4 bg-black/5 dark:bg-white/10 w-3/4" />
           </div>
         ))}
       </div>
@@ -50,10 +50,10 @@ function PremiumBackdrop() {
     <div className="fixed inset-0 -z-10 pointer-events-none">
       <div className="absolute inset-0 bg-white dark:bg-black" />
 
-      {/* soft top vignette (neutral) */}
+      {/* soft top vignette */}
       <div className="absolute inset-0 bg-[radial-gradient(1200px_800px_at_50%_12%,rgba(0,0,0,0.06),transparent_62%)] dark:bg-[radial-gradient(1200px_800px_at_50%_12%,rgba(255,255,255,0.06),transparent_62%)]" />
 
-      {/* architectural grid (neutral, very subtle) */}
+      {/* subtle grid */}
       <div
         className="absolute inset-0 opacity-[0.06] dark:opacity-[0.08]
         [background-image:linear-gradient(to_right,rgba(0,0,0,0.22)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.22)_1px,transparent_1px)]
@@ -80,31 +80,30 @@ function Rail({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* ---------------- Full-bleed bands (no extra lines) ---------------- */
+/* ---------------- Full-bleed bands (tightened spacing) ---------------- */
 function Band({
   children,
-  density = 'normal',
+  density = "normal",
 }: {
   children: React.ReactNode;
-  density?: 'tight' | 'normal' | 'loose';
+  density?: "tight" | "normal" | "loose";
 }) {
   const pad =
-    density === 'tight'
-      ? 'py-8 sm:py-10'
-      : density === 'loose'
-        ? 'py-12 sm:py-14'
-        : 'py-10 sm:py-12';
+    density === "tight"
+      ? "py-4 sm:py-6"
+      : density === "loose"
+      ? "py-8 sm:py-10"
+      : "py-6 sm:py-8";
 
   return (
     <section className="relative w-full">
-      {/* neutral band overlay (no hairlines) */}
       <div className="absolute inset-0 bg-black/[0.02] dark:bg-white/[0.03]" />
       <div className={`relative ${pad}`}>{children}</div>
     </section>
   );
 }
 
-/* ---------------- Ultra Header (embedded accents only, no side rails) ---------------- */
+/* ---------------- Section Header ---------------- */
 function SectionHeader({
   title,
   note,
@@ -116,10 +115,9 @@ function SectionHeader({
 }) {
   return (
     <div className="relative text-center px-2 sm:px-0">
-      {/* embedded chips (center only) */}
       <div className="mx-auto flex items-center justify-center gap-2">
-        <span className="h-[2px] w-10 rounded-full bg-[var(--accent-primary)] opacity-85" />
-        <span className="h-[2px] w-10 rounded-full bg-[var(--accent-secondary)] opacity-85" />
+        <span className="h-[2px] w-10 bg-[var(--accent-primary)] opacity-85" />
+        <span className="h-[2px] w-10 bg-[var(--accent-secondary)] opacity-85" />
       </div>
 
       {kicker && (
@@ -141,58 +139,35 @@ function SectionHeader({
   );
 }
 
-/* ---------------- Premium Shell (single border: pink light, blue dark) ----------------
-   ✅ No internal gray lines
-   ✅ No corner ticks
-   ✅ Everything clipped, clean, premium
+/* ---------------- Full-bleed Shell ----------------
+   ✅ edge-to-edge
+   ✅ NO bottom border (removes extra pink line under products)
+   ✅ square
 --------------------------------------------------------------------------- */
-function Shell({
+function FullBleedShell({
   children,
   tight = false,
-  kind = 'default',
 }: {
   children: React.ReactNode;
   tight?: boolean;
-  kind?: 'hero' | 'default';
 }) {
-  const radius = kind === 'hero' ? 'rounded-[26px] sm:rounded-[46px]' : 'rounded-[24px] sm:rounded-[42px]';
-
   return (
-    <div className="relative">
-      <div
-        className={[
-          'relative isolate overflow-hidden',
-          radius,
-          // ✅ Single accent border: light=pink, dark=blue (driven by your --accent-primary mapping)
-          'border',
-          'border-[var(--accent-primary)]',
-          // surfaces
-          'bg-white dark:bg-black',
-          // premium depth
-          'shadow-[0_32px_160px_rgba(0,0,0,0.10)] dark:shadow-[0_32px_160px_rgba(0,0,0,0.88)]',
-        ].join(' ')}
-      >
-        {/* neutral inner gloss only (no lines) */}
-        <div className="pointer-events-none absolute -top-52 left-1/2 -translate-x-1/2 h-80 w-[92%] rounded-full bg-black/[0.03] dark:bg-white/[0.05] blur-3xl" />
-
-        {/* subtle side depth (neutral) */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-40 top-1/2 -translate-y-1/2 h-[520px] w-[520px] rounded-full bg-black/[0.015] dark:bg-white/[0.025] blur-3xl" />
-          <div className="absolute -right-40 top-1/2 -translate-y-1/2 h-[520px] w-[520px] rounded-full bg-black/[0.015] dark:bg-white/[0.025] blur-3xl" />
-        </div>
-
-        <div className={`relative ${tight ? 'p-2 sm:p-3' : 'px-3 sm:px-6 pb-7 sm:pb-9 pt-6 sm:pt-8'}`}>
-          {children}
-        </div>
-      </div>
+    <div className="w-screen mx-[calc(50%-50vw)] border-l border-r border-t border-[var(--accent-primary)] bg-white dark:bg-black">
+      <Rail>
+        <div className={tight ? "py-3" : "py-6 sm:py-8"}>{children}</div>
+      </Rail>
     </div>
   );
 }
 
-/* ---------------- Editorial Intro ---------------- */
-function EditorialIntro() {
+/* ---------------- Hero Shell (same rule: no bottom border) ---------------- */
+function FullBleedHero({ children }: { children: React.ReactNode }) {
   return (
-   <div></div>
+    <div className="w-screen mx-[calc(50%-50vw)] border-l border-r border-t border-[var(--accent-primary)] bg-white dark:bg-black">
+      <Rail>
+        <div className="py-2 sm:py-3">{children}</div>
+      </Rail>
+    </div>
   );
 }
 
@@ -203,40 +178,34 @@ export default function Home() {
       <PremiumBackdrop />
 
       {/* nav untouched — only layout below */}
-      <main className="relative z-10 mt-24 sm:mt-32 lg:mt-36">
-        {/* TOP EDITORIAL BAND */}
-        <Band density="tight">
-          <Rail>
-            <EditorialIntro />
-          </Rail>
-        </Band>
-
+      <main className="relative z-10 mt-14 sm:mt-16 lg:mt-20">
         {/* HERO */}
         <Band density="tight">
-          <Rail>
-            <Shell tight kind="hero">
-              <Suspense fallback={<HeroSkeleton />}>
-                {/* ✅ No extra gray lines on banner image: remove extra borders/hairlines */}
-                <div className="overflow-hidden rounded-[18px] sm:rounded-[32px] bg-white dark:bg-black">
-                  <HeroCarousel />
-                </div>
-              </Suspense>
-            </Shell>
-          </Rail>
+          <FullBleedHero>
+            <Suspense fallback={<HeroSkeleton />}>
+              <div className="bg-white dark:bg-black">
+                <HeroCarousel />
+              </div>
+            </Suspense>
+          </FullBleedHero>
         </Band>
 
         {/* NEW ARRIVALS */}
         <Band density="normal">
           <Rail>
-            <SectionHeader kicker="Curated" title="New Arrivals" note="Fresh drops. Premium finishes. Clean silhouettes." />
-            <div className="mt-7 sm:mt-8">
-              <Shell>
-                <Suspense fallback={<ProductsSkeleton />}>
-                  <NewArrivals />
-                </Suspense>
-              </Shell>
-            </div>
+            <SectionHeader
+              kicker="Curated"
+              title="New Arrivals"
+              note="Fresh drops. Premium finishes. Clean silhouettes."
+            />
           </Rail>
+          <div className="mt-4 sm:mt-5">
+            <FullBleedShell>
+              <Suspense fallback={<ProductsSkeleton />}>
+                <NewArrivals />
+              </Suspense>
+            </FullBleedShell>
+          </div>
         </Band>
 
         {/* TRENDING */}
@@ -247,45 +216,53 @@ export default function Home() {
               title="Trending"
               note="Best sellers and statement pieces — minimal design, maximum impact."
             />
-            <div className="mt-7 sm:mt-8">
-              <Shell>
-                <Suspense fallback={<ProductsSkeleton />}>
-                  <TrendingProducts />
-                </Suspense>
-              </Shell>
-            </div>
           </Rail>
+          <div className="mt-4 sm:mt-5">
+            <FullBleedShell>
+              <Suspense fallback={<ProductsSkeleton />}>
+                <TrendingProducts />
+              </Suspense>
+            </FullBleedShell>
+          </div>
         </Band>
 
         {/* MENS */}
         <Band density="loose">
           <Rail>
-            <SectionHeader kicker="Mens" title="Mens Collection" note="Modern essentials — effortless and elevated." />
-            <div className="mt-7 sm:mt-8">
-              <Shell>
-                <Suspense fallback={<ProductsSkeleton />}>
-                  <MensCollection />
-                </Suspense>
-              </Shell>
-            </div>
+            <SectionHeader
+              kicker="Mens"
+              title="Mens Collection"
+              note="Modern essentials — effortless and elevated."
+            />
           </Rail>
+          <div className="mt-4 sm:mt-5">
+            <FullBleedShell>
+              <Suspense fallback={<ProductsSkeleton />}>
+                <MensCollection />
+              </Suspense>
+            </FullBleedShell>
+          </div>
         </Band>
 
         {/* WOMENS */}
         <Band density="loose">
           <Rail>
-            <SectionHeader kicker="Womens" title="Womens Collection" note="Refined streetwear — sharp details, clean fit." />
-            <div className="mt-7 sm:mt-8">
-              <Shell>
-                <Suspense fallback={<ProductsSkeleton />}>
-                  <WomensCollection />
-                </Suspense>
-              </Shell>
-            </div>
+            <SectionHeader
+              kicker="Womens"
+              title="Womens Collection"
+              note="Refined streetwear — sharp details, clean fit."
+            />
           </Rail>
+          <div className="mt-4 sm:mt-5">
+            <FullBleedShell>
+              <Suspense fallback={<ProductsSkeleton />}>
+                <WomensCollection />
+              </Suspense>
+            </FullBleedShell>
+          </div>
         </Band>
 
-        <div className="h-10 sm:h-14" />
+        <div className="h-8 sm:h-10" />
       </main>
     </div>
   );

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ✅ Global tokens + next-themes selector (dark on <html>) */
+/* ✅ Clean Global Tokens (PINK ONLY) + next-themes selector (dark on <html>) */
 @layer base {
   :root {
     /* ------------------------------
@@ -48,34 +48,29 @@
     --sidebar-accent: 0 0% 95.9%;
     --sidebar-accent-foreground: 0 0% 0%;
     --sidebar-border: 0 0% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 0 0% 0%;
 
     /* ------------------------------
-       Accent system (NO MIXING)
-       - You asked: both themes should show both colors,
-         but kept SEPARATE (no blending).
-       - We expose:
-         --accent-pink* and --accent-blue*
-         --accent-primary / --accent-secondary swap by theme
+       Accent system (PINK ONLY)
        ------------------------------ */
     --accent-pink: #ff4da7;
     --accent-pink-soft: rgba(255, 77, 167, 0.32);
     --accent-pink-soft2: rgba(255, 77, 167, 0.16);
 
-    --accent-blue: #4d94ff;
-    --accent-blue-soft: rgba(77, 148, 255, 0.34);
-    --accent-blue-soft2: rgba(77, 148, 255, 0.17);
+    /* ✅ Remove blue: keep names for compatibility but route to pink */
+    --accent-blue: var(--accent-pink);
+    --accent-blue-soft: var(--accent-pink-soft);
+    --accent-blue-soft2: var(--accent-pink-soft2);
 
-    /* LIGHT routing:
-       primary = pink, secondary = blue */
+    /* Primary/secondary both pink */
     --accent-primary: var(--accent-pink);
-    --accent-secondary: var(--accent-blue);
+    --accent-secondary: var(--accent-pink);
 
     --accent-primary-soft: var(--accent-pink-soft);
     --accent-primary-soft2: var(--accent-pink-soft2);
 
-    --accent-secondary-soft: var(--accent-blue-soft);
-    --accent-secondary-soft2: var(--accent-blue-soft2);
+    --accent-secondary-soft: var(--accent-pink-soft);
+    --accent-secondary-soft2: var(--accent-pink-soft2);
   }
 
   /* ✅ next-themes puts "dark" on <html> */
@@ -114,20 +109,19 @@
     /* Sidebar tokens (dark) */
     --sidebar: 0 0% 0%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 0%;
     --sidebar-accent: 0 0% 6%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 14%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 0 0% 100%;
 
-    /* DARK routing:
-       primary = blue, secondary = pink */
-    --accent-primary: var(--accent-blue);
+    /* ✅ PINK ONLY routing in dark */
+    --accent-primary: var(--accent-pink);
     --accent-secondary: var(--accent-pink);
 
-    --accent-primary-soft: var(--accent-blue-soft);
-    --accent-primary-soft2: var(--accent-blue-soft2);
+    --accent-primary-soft: var(--accent-pink-soft);
+    --accent-primary-soft2: var(--accent-pink-soft2);
 
     --accent-secondary-soft: var(--accent-pink-soft);
     --accent-secondary-soft2: var(--accent-pink-soft2);
@@ -142,8 +136,6 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    -webkit-text-size-adjust: 100%;
-    -ms-text-size-adjust: 100%;
   }
 
   html,
@@ -152,7 +144,7 @@
     overflow-x: hidden;
   }
 
-  /* ✅ Force correct colors globally (beats accidental overrides) */
+  /* ✅ Global colors */
   body {
     background-color: hsl(var(--background)) !important;
     color: hsl(var(--foreground)) !important;
@@ -167,55 +159,6 @@
       background-color var(--theme-transition),
       color var(--theme-transition),
       border-color var(--theme-transition);
-  }
-
-  /* Video optimization */
-  video {
-    object-fit: cover !important;
-    object-position: center center !important;
-    image-rendering: auto !important;
-  }
-
-  /* Form inputs - prevent zoom on iOS */
-  input,
-  select,
-  textarea,
-  button {
-    font-size: max(16px, 1rem) !important;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  /* Mobile optimizations */
-  @media (max-width: 768px) {
-    * {
-      -webkit-touch-callout: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-    }
-  }
-
-  /* High DPI displays */
-  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    video {
-      image-rendering: -webkit-optimize-contrast !important;
-    }
-  }
-
-  /* Reduced motion accessibility */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
   }
 }
 
@@ -233,21 +176,19 @@
 
 /* =========================
    Premium Utility Overrides
-   - Helps you avoid refactoring every component
-   - Routes existing blue/pink usage into theme accents
-   - Still NO mixing: blue stays blue, pink stays pink
+   - Route any existing blue utilities to PINK (so nothing breaks)
    ========================= */
 
-/* ---- BLUE mappings (keep blue always blue) ---- */
-.border-blue-500 { border-color: var(--accent-blue) !important; }
-.text-blue-500 { color: var(--accent-blue) !important; }
-.bg-blue-500 { background-color: var(--accent-blue) !important; }
-.ring-blue-500 { --tw-ring-color: var(--accent-blue) !important; }
+/* ---- "Blue" class mappings -> Pink ---- */
+.border-blue-500 { border-color: var(--accent-pink) !important; }
+.text-blue-500 { color: var(--accent-pink) !important; }
+.bg-blue-500 { background-color: var(--accent-pink) !important; }
+.ring-blue-500 { --tw-ring-color: var(--accent-pink) !important; }
 
-.border-blue-400 { border-color: var(--accent-blue) !important; }
-.text-blue-400 { color: var(--accent-blue) !important; }
-.bg-blue-600 { background-color: var(--accent-blue) !important; }
-.text-blue-600 { color: var(--accent-blue) !important; }
+.border-blue-400 { border-color: var(--accent-pink) !important; }
+.text-blue-400 { color: var(--accent-pink) !important; }
+.bg-blue-600 { background-color: var(--accent-pink) !important; }
+.text-blue-600 { color: var(--accent-pink) !important; }
 
 /* ---- Your hardcoded dark pink classes (route to pink var) ---- */
 /* Tailwind escapes: dark:border-[#a90068] => dark:border-\[\#a90068\] */
@@ -259,11 +200,10 @@ html.dark .dark\:bg-\[\#a90068\] { background-color: var(--accent-pink) !importa
 html.dark .dark\:bg-\[\#a90068\]\/20 { background-color: color-mix(in srgb, var(--accent-pink) 20%, transparent) !important; }
 html.dark .dark\:bg-\[\#a90068\]\/30 { background-color: color-mix(in srgb, var(--accent-pink) 30%, transparent) !important; }
 
-/* ---- Focus ring (no color blending; pick primary) ---- */
+/* ---- Focus ring (pink only) ---- */
 :focus-visible {
   outline: none;
-  /* ring uses primary only */
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 55%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-pink) 55%, transparent);
 }
 
 /* Optional: smoother typography feel */

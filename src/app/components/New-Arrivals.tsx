@@ -1,25 +1,28 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import React, { useEffect, useState, useCallback, memo, useMemo } from 'react';
-import type { Image as SanityImageSource } from 'sanity';
-import imageUrlBuilder from '@sanity/image-url';
-import { client } from '@/sanity/lib/client';
-import { sanityLoader } from '@/lib/sanityImageLoader';
-import { useTheme } from './theme-context';
+import Image from "next/image";
+import Link from "next/link";
+import React, { useEffect, useState, useCallback, memo, useMemo } from "react";
+import type { Image as SanityImageSource } from "sanity";
+import imageUrlBuilder from "@sanity/image-url";
+import { client } from "@/sanity/lib/client";
+import { sanityLoader } from "@/lib/sanityImageLoader";
+import { useTheme } from "./theme-context";
 
 /* =========================
    Types
    ========================= */
+type SanityAssetMaybeUrl =
+  | (SanityImageSource & { url?: string })
+  | { _ref?: string; url?: string };
 
-type SanityAssetMaybeUrl = (SanityImageSource & { url?: string }) | { _ref?: string; url?: string };
 interface ProductImage {
   asset?: SanityAssetMaybeUrl;
   /** Explicit dereferenced URL (from GROQ). */
   url?: string;
   alt?: string;
 }
+
 interface IProduct {
   _id: string;
   name: string;
@@ -34,31 +37,34 @@ interface IProduct {
    Builder (fallback when url missing)
    ========================= */
 const builder = imageUrlBuilder(client);
-const buildUrl = (source: unknown, width = 800): string | undefined => {
+
+const buildUrl = (source: unknown, width = 1200): string | undefined => {
   try {
     if (!source) return undefined;
+
     // direct string url
-    if (typeof source === 'string' && source.startsWith('http')) return source;
+    if (typeof source === "string" && source.startsWith("http")) return source;
+
     // asset/url on object directly
     const a = source as any;
-    if (typeof a?.url === 'string') return a.url;
+    if (typeof a?.url === "string") return a.url;
+
     // build from ref/object
-    return builder.image(source as any).width(width).fit('max').auto('format').url();
+    return builder.image(source as any).width(width).fit("max").auto("format").url();
   } catch {
     return undefined;
   }
 };
 
-/* ======= Banner with Image ======= */
+/* =========================
+   Banner (EXACT same behavior as Mens final)
+   Desktop: 200px
+   Tablet: 140px + scale(1.5)
+   Mobile: 120px + scale(2)
+   ========================= */
 const CategoryBanner = memo(function CategoryBanner({
-  category = 'New Arrivals',
-  title = 'New Arrivals',
-  subtitle = 'Discover our latest premium collection featuring the newest additions to our store',
-  className = '',
+  className = "",
 }: {
-  readonly category?: string;
-  readonly title?: string;
-  readonly subtitle?: string;
   readonly className?: string;
 }) {
   return (
@@ -69,29 +75,29 @@ const CategoryBanner = memo(function CategoryBanner({
             src="/newarrivals.png"
             alt="New Arrivals Banner"
             fill
-            style={{ objectFit: 'cover', objectPosition: 'center' }}
             priority
+            sizes="100vw"
+            style={{ objectFit: "cover", objectPosition: "center" }}
           />
         </div>
       </div>
 
       <style jsx>{`
-        .category-banner-container { 
-          width:100%; 
-          position:relative; 
-          overflow:hidden; 
-          border-radius:16px; 
-          margin:0 auto 1.5rem; 
+        .category-banner-container {
+          width: 100%;
+          position: relative;
+          overflow: hidden;
+          margin: 0 auto 1.5rem;
         }
-        .category-banner { 
-          position:relative; 
-          height:200px; 
-          background:transparent; 
-          overflow:hidden; 
-         border: 1px solid hsl(var(--border));
-          border-radius:16px;
+
+        .category-banner {
+          position: relative;
+          height: 200px;
+          background: transparent;
+          overflow: hidden;
+          border: 1px solid rgba(0, 0, 0, 0.12);
         }
-        
+
         .image-wrapper {
           position: relative;
           width: 100%;
@@ -99,123 +105,138 @@ const CategoryBanner = memo(function CategoryBanner({
           transform: scale(1);
           transition: transform 0.3s ease;
         }
-        
+
         /* Tablet */
-        @media (max-width:768px) { 
-          .category-banner { height:140px; }
-          .image-wrapper { transform: scale(1.5); }
+        @media (max-width: 768px) {
+          .category-banner {
+            height: 140px;
+          }
+          .image-wrapper {
+            transform: scale(1.5);
+          }
         }
-        
+
         /* Mobile */
-        @media (max-width:480px) { 
-          .category-banner { height:120px; }
-          .image-wrapper { transform: scale(2); }
+        @media (max-width: 480px) {
+          .category-banner {
+            height: 120px;
+          }
+          .image-wrapper {
+            transform: scale(2);
+          }
+        }
+
+        :global(.dark) .category-banner {
+          border: 1px solid rgba(255, 255, 255, 0.12);
         }
       `}</style>
     </div>
   );
 });
-CategoryBanner.displayName = 'CategoryBanner';
+CategoryBanner.displayName = "CategoryBanner";
 
-/* ======= Card ======= */
-const ProductCard = memo(function ProductCard({ product, index }: { product: IProduct; index: number }) {
+/* =========================
+   Card (EXACT same style as Mens final)
+   ========================= */
+const ProductCard = memo(function ProductCard({
+  product,
+  index,
+}: {
+  product: IProduct;
+  index: number;
+}) {
   const [loaded, setLoaded] = useState(false);
   useTheme(); // keep your original behavior
 
   const first = useMemo(() => product.images?.[0], [product.images]);
 
-  // Robust URL resolver:
-  // 1) explicit 'url' from GROQ
-  // 2) asset.url if present
-  // 3) build from asset/ref
   const imageUrl = useMemo<string | undefined>(() => {
     return (
-      (typeof first?.url === 'string' && first.url) ||
-      (typeof (first?.asset as any)?.url === 'string' && (first!.asset as any).url) ||
+      (typeof first?.url === "string" && first.url) ||
+      (typeof (first?.asset as any)?.url === "string" && (first!.asset as any).url) ||
       buildUrl(first?.asset)
     );
   }, [first]);
 
   return (
-    <Link
-      href={`/product/${product._id}`}
-      className="group transform transition-transform duration-200 hover:scale-[1.02] hover:shadow-lg dark:hover:shadow-pink-500/20"
-      style={{ animationDelay: `${index * 50}ms`, animation: 'fadeInUp 0.4s ease-out forwards' }}
-    >
-      <div className="relative w-full aspect-[4/5] overflow-hidden bg-transparent rounded-sm isolate">
+    <Link href={`/product/${product._id}`} className="group block" aria-label={product.name}>
+      {/* Image area (Mens exact) */}
+      <div className="relative w-full aspect-[3/4] border border-black/10 dark:border-white/10 overflow-hidden bg-white dark:bg-black">
         {!loaded && (
-          <div
-            className="absolute inset-0 animate-pulse"
-            style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 37%, rgba(255,255,255,0.06) 63%)' }}
-          />
+          <div className="absolute inset-0 animate-pulse bg-black/[0.03] dark:bg-white/[0.05]" />
         )}
 
         {imageUrl ? (
           <Image
             loader={sanityLoader}
-            src={imageUrl}                       // must be a string
+            src={imageUrl}
             alt={first?.alt || product.name}
             fill
-            className={`object-contain transition-opacity duration-200 group-hover:opacity-90 ${loaded ? 'opacity-100' : 'opacity-0'}`}
-            style={{ backgroundColor: 'transparent' }}
-            sizes="(max-width:640px) 50vw, (max-width:768px) 33vw, (max-width:1024px) 25vw, 20vw"
-            quality={80}
-            onLoadingComplete={() => setLoaded(true)} // more reliable
-            priority={index < 4}
-            // TEMP: ensure nothing hits /_next/image while debugging
-            unoptimized={true}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className={`object-cover transition-opacity duration-200 ${loaded ? "opacity-100" : "opacity-0"}`}
+            onLoadingComplete={() => setLoaded(true)}
+            priority={index < 2}
+            unoptimized
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm font-light bg-transparent">
-          No Image
-        </div>
+          <div className="absolute inset-0 flex items-center justify-center text-xs text-black/50 dark:text-white/50">
+            No Image
+          </div>
         )}
 
-{(product.newArrival || product.onSale || product.outOfStock) && (
+        {(product.newArrival || product.onSale || product.outOfStock) && (
           <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {product.newArrival && <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2 py-0.5 text-xs font-bold shadow-sm rounded-sm">NEW</span>}
-            {product.onSale && <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-2 py-0.5 text-xs font-bold shadow-sm rounded-sm">SALE</span>}
-            {product.outOfStock && <span className="bg-gradient-to-r from-gray-600 to-gray-800 text-white px-2 py-0.5 text-xs font-bold shadow-sm rounded-sm">OUT OF STOCK</span>}
+            {product.newArrival && (
+              <span className="bg-black text-white px-2 py-1 text-[10px] tracking-wide">
+                NEW
+              </span>
+            )}
+            {product.onSale && (
+              <span className="bg-[#a90068] text-white px-2 py-1 text-[10px] tracking-wide">
+                SALE
+              </span>
+            )}
+            {product.outOfStock && (
+              <span className="bg-gray-700 text-white px-2 py-1 text-[10px] tracking-wide">
+                OUT OF STOCK
+              </span>
+            )}
           </div>
         )}
       </div>
 
-      <div className="mt-2">
-        <div className="border border-blue-500 dark:border-[#a90068] bg-transparent p-2 text-center transition-colors duration-200 group-hover:border-opacity-80">
-        <h4 className="text-sm md:text-base text-foreground truncate font-light mb-1">
-  {product.name}
-</h4>
-<p className="text-sm md:text-base text-foreground font-light">
-  ${product.price.toFixed(2)}
-</p>
-
-        </div>
+      {/* Text (Mens exact + centered) */}
+      <div className="pt-2 text-center">
+        <p className="mx-auto text-[13px] md:text-sm font-light text-foreground leading-snug line-clamp-1 text-center">
+          {product.name}
+        </p>
+        <p className="mx-auto text-[13px] md:text-sm font-light text-foreground/90 text-center">
+          ${product.price.toFixed(2)}
+        </p>
       </div>
     </Link>
   );
 });
-ProductCard.displayName = 'ProductCard';
+ProductCard.displayName = "ProductCard";
 
-/* ======= Skeleton ======= */
-const ProductSkeleton = memo(function ProductSkeleton({ index }: { index: number }) {
+/* =========================
+   Skeleton (Mens-style)
+   ========================= */
+const ProductSkeleton = memo(function ProductSkeleton() {
   return (
-    <div className="group animate-pulse" style={{ animationDelay: `${index * 50}ms`, animation: 'fadeInUp 0.4s ease-out forwards' }}>
-      <div className="relative w-full aspect-[4/5] overflow-hidden bg-transparent rounded-sm">
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 37%, rgba(255,255,255,0.06) 63%)' }} />
-      </div>
-      <div className="mt-2">
-        <div className="border border-gray-300/50 dark:border-gray-600/50 bg-transparent p-2 text-center">
-          <div className="h-4 bg-white/10 dark:bg-white/10 rounded mb-1" />
-          <div className="h-4 bg-white/10 dark:bg-white/10 rounded w-16 mx-auto" />
-        </div>
+    <div className="animate-pulse">
+      <div className="w-full aspect-[3/4] border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.05]" />
+      <div className="pt-2 space-y-2 text-center">
+        <div className="h-3 w-3/4 mx-auto bg-black/[0.06] dark:bg-white/[0.07]" />
+        <div className="h-3 w-1/4 mx-auto bg-black/[0.06] dark:bg-white/[0.07]" />
       </div>
     </div>
   );
 });
-ProductSkeleton.displayName = 'ProductSkeleton';
+ProductSkeleton.displayName = "ProductSkeleton";
 
 /* =========================
-   Page
+   Page (Mens exact layout)
    ========================= */
 const NewArrivals = memo(function NewArrivals() {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -227,7 +248,7 @@ const NewArrivals = memo(function NewArrivals() {
       setIsLoading(true);
       setError(null);
 
-      // Return BOTH the direct url and full asset so we can always resolve
+      // ✅ GROQ query kept STRICTLY SAME as you provided
       const query = `*[_type == "product" &&
   references(*[_type == "category" && title == "new-arrivals"]._id) &&
   defined(images[0].asset)
@@ -248,62 +269,63 @@ const NewArrivals = memo(function NewArrivals() {
       const data = await client.fetch<IProduct[]>(query);
       setProducts(data);
     } catch (err) {
-      console.error('Error fetching products:', err);
-      setError('Failed to load products');
+      console.error("Error fetching products:", err);
+      setError("Failed to load products");
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetchProducts(); }, [fetchProducts]);
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
-  const grid = useMemo(
-    () => products.slice(0, 4).map((p, i) => <ProductCard key={p._id} product={p} index={i} />),
-    [products]
+  const grid = useMemo(() => {
+    const shown = products.slice(0, 4);
+    return shown.map((p, i) => <ProductCard key={p._id} product={p} index={i} />);
+  }, [products]);
+
+  const skeletons = useMemo(
+    () => Array.from({ length: 4 }, (_, i) => <ProductSkeleton key={i} />),
+    []
   );
-
-  const skeletons = useMemo(() => Array.from({ length: 4 }, (_, i) => <ProductSkeleton key={i} index={i} />), []);
 
   return (
-    <>
-      <style jsx>{`
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-      `}</style>
+    <section className="font-montserrat mb-12">
+      {/* Banner (Mens behavior) */}
+      <div className="px-2 sm:px-6 mb-4">
+        <CategoryBanner />
+      </div>
 
-      <section className="text-center mb-12 font-montserrat">
-        <div className="px-2 sm:px-6 mb-4">
-          <CategoryBanner />
-        </div>
-
-        <div className="px-2 sm:px-6">
-          <div className="isolate border border-blue-500 dark:border-[#a90068] bg-transparent rounded-lg p-4 sm:p-6 will-change-transform">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-              {isLoading ? (
-                skeletons
-              ) : error ? (
-                <div className="col-span-full text-center py-6">
-                  <p className="text-red-500 dark:text-red-400 mb-3 text-sm sm:text-base font-light">{error}</p>
-                  <button onClick={fetchProducts} className="px-4 py-2 border border-blue-500 dark:border-[#a90068] text-blue-500 dark:text-[#a90068] hover:bg-blue-500/10 dark:hover:bg-[#a90068]/10 transition-colors font-light rounded text-sm">
-                    Try Again
-                  </button>
-                </div>
-              ) : products.length === 0 ? (
-                <div className="col-span-full text-center py-6">
-                <p className="text-muted-foreground text-sm sm:text-base font-light">
-  No products found
-</p>
-
-                </div>
-              ) : (
-                grid
-              )}
-            </div>
+      {/* ✅ Mens exact: Edge-to-edge OUTER pink border wrapper */}
+      <div className="w-screen mx-[calc(50%-50vw)] border border-[#a90068]">
+        <div className="px-2 sm:px-6 py-5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {isLoading ? (
+              skeletons
+            ) : error ? (
+              <div className="col-span-full text-center py-6">
+                <p className="text-red-500 dark:text-red-400 mb-3 text-sm font-light">{error}</p>
+                <button
+                  onClick={fetchProducts}
+                  className="px-4 py-2 border border-[#a90068] text-[#a90068] hover:bg-[#a90068]/10 transition-colors font-light text-sm"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : products.length === 0 ? (
+              <div className="col-span-full text-center py-6">
+                <p className="text-muted-foreground text-sm font-light">No products found</p>
+              </div>
+            ) : (
+              grid
+            )}
           </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 });
-NewArrivals.displayName = 'NewArrivals';
+NewArrivals.displayName = "NewArrivals";
 
 export default NewArrivals;

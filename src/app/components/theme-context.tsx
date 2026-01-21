@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   createContext,
@@ -8,8 +8,8 @@ import {
   useCallback,
   useMemo,
   type ReactNode,
-} from 'react';
-import { useTheme as useNextTheme } from 'next-themes';
+} from "react";
+import { useTheme as useNextTheme } from "next-themes";
 
 interface ThemeContextType {
   isDarkMode: boolean;
@@ -28,71 +28,71 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [isThemeLoaded, setIsThemeLoaded] = useState(false);
   const [initialThemeSet, setInitialThemeSet] = useState(false);
 
-  const currentTheme = theme === 'system' ? resolvedTheme : theme;
-  const isDarkMode = currentTheme === 'dark';
+  const currentTheme = theme === "system" ? resolvedTheme : theme;
+  const isDarkMode = currentTheme === "dark";
 
   const updateThemeVariables = useCallback((isDark: boolean) => {
     const root = document.documentElement;
 
     requestAnimationFrame(() => {
-      root.classList.toggle('dark', isDark);
+      root.classList.toggle("dark", isDark);
 
-      // ✅ separate accents (NO blending)
-      const PINK = '#a90068';
-      const PINK_HOVER = '#8a0055';
-      const BLUE = '#3b82f6';
-      const BLUE_HOVER = '#2563eb';
+      // ✅ SINGLE ACCENT SYSTEM: PINK ONLY
+      const PINK = "#a90068";
+      const PINK_HOVER = "#8a0055";
 
       const properties: Record<string, string> = isDark
         ? {
             // 🌙 DARK (pitch black)
-            '--theme-bg': '#000000',
-            '--theme-surface': '#000000',
-            '--theme-text': '#ffffff',
-            '--theme-text-muted': '#cbd5e1',
-            '--theme-border': '#262626',
+            "--theme-bg": "#000000",
+            "--theme-surface": "#000000",
+            "--theme-text": "#ffffff",
+            "--theme-text-muted": "#cbd5e1",
+            "--theme-border": "#262626",
 
-            // ✅ separate accents
-            '--accent-pink': PINK,
-            '--accent-pink-hover': PINK_HOVER,
-            '--accent-blue': BLUE,
-            '--accent-blue-hover': BLUE_HOVER,
+            // ✅ Pink accent only
+            "--accent-pink": PINK,
+            "--accent-pink-hover": PINK_HOVER,
+            "--accent-pink-soft": "rgba(169, 0, 104, 0.22)",
 
-            // soft glows (still separate)
-            '--accent-pink-soft': 'rgba(169, 0, 104, 0.22)',
-            '--accent-blue-soft': 'rgba(59, 130, 246, 0.22)',
+            // ✅ Compatibility: map any old blue vars to pink (prevents breakage)
+            "--accent-blue": PINK,
+            "--accent-blue-hover": PINK_HOVER,
+            "--accent-blue-soft": "rgba(169, 0, 104, 0.22)",
 
-            // default primary if needed
-            '--theme-primary': PINK,
-            '--theme-primary-hover': PINK_HOVER,
+            // default primary
+            "--theme-primary": PINK,
+            "--theme-primary-hover": PINK_HOVER,
 
             // shadcn vars
-            '--background': '0 0% 0%',
-            '--foreground': '0 0% 100%',
+            "--background": "0 0% 0%",
+            "--foreground": "0 0% 100%",
           }
         : {
             // ☀️ LIGHT (pure white, black text)
-            '--theme-bg': '#ffffff',
-            '--theme-surface': '#ffffff',
-            '--theme-text': '#000000',
-            '--theme-text-muted': '#4b5563',
-            '--theme-border': '#e5e7eb',
+            "--theme-bg": "#ffffff",
+            "--theme-surface": "#ffffff",
+            "--theme-text": "#000000",
+            "--theme-text-muted": "#4b5563",
+            "--theme-border": "#e5e7eb",
 
-            // ✅ separate accents
-            '--accent-pink': PINK,
-            '--accent-pink-hover': PINK_HOVER,
-            '--accent-blue': BLUE,
-            '--accent-blue-hover': BLUE_HOVER,
+            // ✅ Pink accent only
+            "--accent-pink": PINK,
+            "--accent-pink-hover": PINK_HOVER,
+            "--accent-pink-soft": "rgba(169, 0, 104, 0.12)",
 
-            '--accent-pink-soft': 'rgba(169, 0, 104, 0.12)',
-            '--accent-blue-soft': 'rgba(59, 130, 246, 0.12)',
+            // ✅ Compatibility: map any old blue vars to pink (prevents breakage)
+            "--accent-blue": PINK,
+            "--accent-blue-hover": PINK_HOVER,
+            "--accent-blue-soft": "rgba(169, 0, 104, 0.12)",
 
-            '--theme-primary': PINK,
-            '--theme-primary-hover': PINK_HOVER,
+            // default primary
+            "--theme-primary": PINK,
+            "--theme-primary-hover": PINK_HOVER,
 
             // shadcn vars
-            '--background': '0 0% 100%',
-            '--foreground': '0 0% 0%',
+            "--background": "0 0% 100%",
+            "--foreground": "0 0% 0%",
           };
 
       Object.entries(properties).forEach(([key, value]) => {
@@ -100,23 +100,23 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       });
 
       const meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute('content', isDark ? '#000000' : '#ffffff');
+      if (meta) meta.setAttribute("content", isDark ? "#000000" : "#ffffff");
     });
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && !initialThemeSet) {
-      const storedTheme = localStorage.getItem('theme');
-      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (typeof window !== "undefined" && !initialThemeSet) {
+      const storedTheme = localStorage.getItem("theme");
+      const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-      let initialTheme: 'light' | 'dark';
-      if (storedTheme === 'dark' || storedTheme === 'light') {
+      let initialTheme: "light" | "dark";
+      if (storedTheme === "dark" || storedTheme === "light") {
         initialTheme = storedTheme;
       } else {
-        initialTheme = systemDark ? 'dark' : 'light';
+        initialTheme = systemDark ? "dark" : "light";
       }
 
-      updateThemeVariables(initialTheme === 'dark');
+      updateThemeVariables(initialTheme === "dark");
 
       if (theme !== initialTheme) setTheme(initialTheme);
 
@@ -130,10 +130,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [currentTheme, isDarkMode, updateThemeVariables, initialThemeSet]);
 
   const toggleTheme = useCallback(() => {
-    const next = isDarkMode ? 'light' : 'dark';
+    const next = isDarkMode ? "light" : "dark";
     updateThemeVariables(!isDarkMode);
     setTheme(next);
-    localStorage.setItem('theme', next);
+    localStorage.setItem("theme", next);
   }, [isDarkMode, setTheme, updateThemeVariables]);
 
   const contextValue = useMemo(
@@ -150,6 +150,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
 export function useTheme(): ThemeContextType {
   const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error('useTheme must be used within a ThemeProvider');
+  if (!ctx) throw new Error("useTheme must be used within a ThemeProvider");
   return ctx;
 }

@@ -4,8 +4,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
-  // ✅ Required for Turbopack/Vercel with three + postprocessing
-  transpilePackages: ["three", "postprocessing"],
+  // ✅ Add sanity packages here (keep your existing ones)
+  transpilePackages: [
+    "three",
+    "postprocessing",
+    "sanity",
+    "next-sanity",
+    "@sanity/ui",
+    "@sanity/icons",
+  ],
 
   experimental: {
     optimizePackageImports: ["three"],
@@ -21,7 +28,6 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // Keep TS strict in build (recommended)
   typescript: {
     ignoreBuildErrors: false,
   },
