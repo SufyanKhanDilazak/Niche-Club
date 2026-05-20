@@ -1,0 +1,224 @@
+@tailwind base;
+
+@custom-variant dark (&:is(.dark *));
+@tailwind components;
+@tailwind utilities;
+
+/* ✅ Clean Global Tokens (PINK ONLY) + next-themes selector (dark on <html>) */
+@layer base {
+  :root {
+    /* ------------------------------
+       Core shadcn tokens (LIGHT)
+       ------------------------------ */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 0%;
+
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 35%;
+
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 0%;
+    --radius: 0.5rem;
+
+    /* Theme transition */
+    --theme-transition: 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* Sidebar tokens (light) */
+    --sidebar: 0 0% 98%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 0 0% 0%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 95.9%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 91%;
+    --sidebar-ring: 0 0% 0%;
+
+    /* ------------------------------
+       Accent system (PINK ONLY)
+       ------------------------------ */
+    --accent-pink: #ff4da7;
+    --accent-pink-soft: rgba(255, 77, 167, 0.32);
+    --accent-pink-soft2: rgba(255, 77, 167, 0.16);
+
+    /* ✅ Remove blue: keep names for compatibility but route to pink */
+    --accent-blue: var(--accent-pink);
+    --accent-blue-soft: var(--accent-pink-soft);
+    --accent-blue-soft2: var(--accent-pink-soft2);
+
+    /* Primary/secondary both pink */
+    --accent-primary: var(--accent-pink);
+    --accent-secondary: var(--accent-pink);
+
+    --accent-primary-soft: var(--accent-pink-soft);
+    --accent-primary-soft2: var(--accent-pink-soft2);
+
+    --accent-secondary-soft: var(--accent-pink-soft);
+    --accent-secondary-soft2: var(--accent-pink-soft2);
+  }
+
+  /* ✅ next-themes puts "dark" on <html> */
+  html.dark {
+    /* ------------------------------
+       Core shadcn tokens (DARK)
+       ------------------------------ */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 6%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 6%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 0 0% 6%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --ring: 0 0% 100%;
+
+    /* Sidebar tokens (dark) */
+    --sidebar: 0 0% 0%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 6%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 14%;
+    --sidebar-ring: 0 0% 100%;
+
+    /* ✅ PINK ONLY routing in dark */
+    --accent-primary: var(--accent-pink);
+    --accent-secondary: var(--accent-pink);
+
+    --accent-primary-soft: var(--accent-pink-soft);
+    --accent-primary-soft2: var(--accent-pink-soft2);
+
+    --accent-secondary-soft: var(--accent-pink-soft);
+    --accent-secondary-soft2: var(--accent-pink-soft2);
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  html,
+  body {
+    height: 100%;
+    overflow-x: hidden;
+  }
+
+  /* ✅ Global colors */
+  body {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+  }
+
+  /* Smooth theme transitions (opt-in via class) */
+  .theme-transition {
+    transition:
+      background-color var(--theme-transition),
+      color var(--theme-transition),
+      border-color var(--theme-transition);
+  }
+}
+
+/* Optional: keep your mapping if you use it somewhere */
+@theme inline {
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-foreground: var(----foreground);
+  --color-background: var(----background);
+}
+
+/* =========================
+   Premium Utility Overrides
+   - Route any existing blue utilities to PINK (so nothing breaks)
+   ========================= */
+
+/* ---- "Blue" class mappings -> Pink ---- */
+.border-blue-500 { border-color: var(--accent-pink) !important; }
+.text-blue-500 { color: var(--accent-pink) !important; }
+.bg-blue-500 { background-color: var(--accent-pink) !important; }
+.ring-blue-500 { --tw-ring-color: var(--accent-pink) !important; }
+
+.border-blue-400 { border-color: var(--accent-pink) !important; }
+.text-blue-400 { color: var(--accent-pink) !important; }
+.bg-blue-600 { background-color: var(--accent-pink) !important; }
+.text-blue-600 { color: var(--accent-pink) !important; }
+
+/* ---- Your hardcoded dark pink classes (route to pink var) ---- */
+/* Tailwind escapes: dark:border-[#a90068] => dark:border-\[\#a90068\] */
+html.dark .dark\:border-\[\#a90068\] { border-color: var(--accent-pink) !important; }
+html.dark .dark\:text-\[\#a90068\] { color: var(--accent-pink) !important; }
+html.dark .dark\:bg-\[\#a90068\] { background-color: var(--accent-pink) !important; }
+
+/* If you used rgba variant in dark backgrounds */
+html.dark .dark\:bg-\[\#a90068\]\/20 { background-color: color-mix(in srgb, var(--accent-pink) 20%, transparent) !important; }
+html.dark .dark\:bg-\[\#a90068\]\/30 { background-color: color-mix(in srgb, var(--accent-pink) 30%, transparent) !important; }
+
+/* ---- Focus ring (pink only) ---- */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-pink) 55%, transparent);
+}
+
+/* Optional: smoother typography feel */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
