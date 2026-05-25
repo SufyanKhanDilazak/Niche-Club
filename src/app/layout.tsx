@@ -23,10 +23,11 @@ const inter = Inter({
   preload: true,
 });
 
-// ─── Site constants ───────────────────────────────────────────────────────────
+// ─── Site Constants ───────────────────────────────────────────────────────────
 const SITE_URL = "https://nicheclub.us";
 const SITE_NAME = "Niche Club";
 const SITE_HANDLE = "@nicheclubny";
+const GOOGLE_ADS_ID = "AW-18163532720";
 
 // ─── Metadata ─────────────────────────────────────────────────────────────────
 export const metadata: Metadata = {
@@ -83,9 +84,9 @@ export const metadata: Metadata = {
       "Shop Niche Club — the New York streetwear brand bringing you premium quality at an affordable price. Explore exclusive drops, hoodies, tees & more.",
     images: [
       {
-        url: `${SITE_URL}/logo.png`,
+        url: `${SITE_URL}/og-image.png`,
         width: 1200,
-        height: 1200,
+        height: 630,
         alt: "Niche Club – Premium Affordable Streetwear, New York",
         type: "image/png",
       },
@@ -99,7 +100,7 @@ export const metadata: Metadata = {
     title: "Niche Club | Premium Affordable Streetwear — New York",
     description:
       "Shop Niche Club — the New York streetwear brand bringing you premium quality at an affordable price. Explore exclusive drops, hoodies, tees & more.",
-    images: [`${SITE_URL}/logo.png`],
+    images: [`${SITE_URL}/og-image.png`],
   },
 
   robots: {
@@ -127,9 +128,7 @@ export const metadata: Metadata = {
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
     ],
-    apple: [
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
-    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
     other: [
       { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#000000" },
     ],
@@ -171,7 +170,7 @@ const organizationJsonLd = {
     width: 512,
     height: 512,
   },
-  image: `${SITE_URL}/logo.png`,
+  image: `${SITE_URL}/og-image.png`,
   description:
     "Niche Club is a premium affordable clothing brand based in New York State, USA. We craft exclusive streetwear including hoodies, tees, and limited drops.",
   foundingLocation: {
@@ -234,40 +233,43 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* ── Preconnects ─────────────────────────────────── */}
+        {/* ── Preconnects ──────────────────────────────────────────────────── */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        {/* ✅ ADDED: preconnect for Google Ads */}
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://www.google-analytics.com" />
+        <link rel="preconnect" href="https://connect.facebook.net" />
 
-        {/* ── JSON-LD Structured Data ─────────────────────── */}
-        {/* ✅ FIXED: changed from beforeInteractive to afterInteractive */}
-        <Script
+        {/* ── JSON-LD Structured Data ───────────────────────────────────────
+            Using native lowercase <script> (not Next.js Script component)
+            so it renders synchronously in <head> for crawlers.            */}
+        <script
           id="ld-organization"
           type="application/ld+json"
-          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(organizationJsonLd),
           }}
         />
-        <Script
+        <script
           id="ld-website"
           type="application/ld+json"
-          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(websiteJsonLd),
           }}
         />
+      </head>
 
-        {/* ── Google Ads (gtag.js) ─────────────────────────── */}
+      <body className="min-h-screen bg-background text-foreground">
+        {/* ── Google Ads (gtag.js) ─────────────────────────────────────────
+            Placed in <body> — Next.js Script with afterInteractive
+            MUST NOT be inside <head> or it gets silently dropped.        */}
         <Script
           id="google-ads-gtag-src"
-          src="https://www.googletagmanager.com/gtag/js?id=AW-18163532720"
+          src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
           strategy="afterInteractive"
         />
         <Script id="google-ads-gtag-init" strategy="afterInteractive">
@@ -275,16 +277,15 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'AW-18163532720');
+            gtag('config', '${GOOGLE_ADS_ID}');
           `}
         </Script>
-      </head>
 
-      <body className="min-h-screen bg-background text-foreground">
-        {/* ── Meta Pixel (site-wide, once) ─────────────────── */}
+        {/* ── Meta Pixel ───────────────────────────────────────────────────── */}
         <MetaPixel />
         <PixelPageView />
 
+        {/* ── App Shell ────────────────────────────────────────────────────── */}
         <ClerkProvider>
           <NextThemeProvider
             attribute="class"
